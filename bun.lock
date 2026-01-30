@@ -1,0 +1,43 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "cluefin-fsd",
+    },
+    "apps/broker": {
+      "name": "@cluefin/broker",
+      "version": "0.0.1",
+      "dependencies": {
+        "@cluefin/securities": "workspace:*",
+      },
+    },
+    "apps/scheduler": {
+      "name": "@cluefin/scheduler",
+      "version": "0.0.1",
+      "dependencies": {
+        "@cluefin/securities": "workspace:*",
+      },
+    },
+    "apps/trader": {
+      "name": "@cluefin/trader",
+      "version": "0.0.1",
+      "dependencies": {
+        "@cluefin/securities": "workspace:*",
+      },
+    },
+    "packages/securities": {
+      "name": "@cluefin/securities",
+      "version": "0.0.1",
+    },
+  },
+  "packages": {
+    "@cluefin/broker": ["@cluefin/broker@workspace:apps/broker"],
+
+    "@cluefin/scheduler": ["@cluefin/scheduler@workspace:apps/scheduler"],
+
+    "@cluefin/securities": ["@cluefin/securities@workspace:packages/securities"],
+
+    "@cluefin/trader": ["@cluefin/trader@workspace:apps/trader"],
+  }
+}

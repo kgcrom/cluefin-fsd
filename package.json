@@ -1,0 +1,5 @@
+{
+  "name": "cluefin-fsd",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"]
+}
