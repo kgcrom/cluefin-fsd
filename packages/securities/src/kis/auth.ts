@@ -1,0 +1,54 @@
+import type { AuthClient, AuthToken, BrokerEnv } from "../types";
+import type {
+  KisCredentials,
+  KisTokenRequest,
+  KisTokenResponse,
+} from "./types";
+
+const BASE_URLS: Record<BrokerEnv, string> = {
+  production: "https://openapi.koreainvestment.com:9443",
+  mock: "https://openapivts.koreainvestment.com:29443",
+};
+
+export function createKisAuthClient(
+  env: BrokerEnv,
+): AuthClient<KisCredentials> {
+  const baseUrl = BASE_URLS[env];
+
+  return {
+    async getToken(credentials: KisCredentials): Promise<AuthToken> {
+      const body: KisTokenRequest = {
+        grant_type: "client_credentials",
+        appkey: credentials.appkey,
+        appsecret: credentials.appsecret,
+      };
+
+      const response = await fetch(`${baseUrl}/oauth2/tokenP`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `KIS token request failed: ${response.status} ${response.statusText}`,
+        );
+      }
+
+      const data: KisTokenResponse = await response.json();
+
+      return {
+        token: data.access_token,
+        tokenType: data.token_type,
+        expiresAt: parseKisDateTime(data.access_token_token_expired),
+      };
+    },
+  };
+}
+
+function parseKisDateTime(dt: string): Date {
+  // KIS returns access_token_token_expired as "yyyy-MM-dd HH:mm:ss"
+  return new Date(`${dt.replace(" ", "T")}+09:00`);
+}
