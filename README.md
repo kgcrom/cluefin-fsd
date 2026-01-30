@@ -68,6 +68,21 @@ bun install
 | `KIWOOM_ENV` | 키움 환경 설정 | `prod` \| `dev` |
 | `KIWOOM_APP_KEY` | 키움 앱 키 | 키움증권에서 발급 |
 | `KIWOOM_SECRET_KEY` | 키움 시크릿 키 | 키움증권에서 발급 |
+| `CLUEFIN_SECRET_STORE_ID` | Cloudflare Secrets Store ID | wrangler로 생성 후 확인 |
+
+### Cloudflare Secrets Store 설정
+
+broker CLI에서 발급한 인증 토큰은 Cloudflare Secrets Store에 저장됩니다. 아래 명령으로 Secrets Store를 생성합니다.
+
+```sh
+npx wrangler secrets-store store create cluefin-fsd --remote
+```
+
+실행 결과로 출력되는 `id` 값을 `.env` 파일의 `CLUEFIN_SECRET_STORE_ID`에 설정합니다.
+
+```
+CLUEFIN_SECRET_STORE_ID=<출력된 id 값>
+```
 
 ## Usage
 

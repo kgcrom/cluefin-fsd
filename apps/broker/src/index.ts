@@ -3,8 +3,8 @@ import {
   createKiwoomAuthClient,
 } from "@cluefin/securities";
 import type { AuthToken, BrokerEnv } from "@cluefin/securities";
-import { brokerTokenKey, serializeAuthToken } from "@cluefin/cloudflare";
-import { putKvToken } from "./kv";
+import { brokerTokenSecretName } from "@cluefin/cloudflare";
+import { putSecretToken } from "./secret";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -52,13 +52,14 @@ if (broker === "kis") {
   });
 }
 
-const namespaceId = requireEnv("CLUEFIN_KV_NAMESPACE_ID");
-const key = brokerTokenKey(broker as "kis" | "kiwoom");
+const storeId = requireEnv("CLUEFIN_SECRET_STORE_ID");
+const name = brokerTokenSecretName(broker as "kis" | "kiwoom");
 
-await putKvToken({
-  namespaceId,
-  key,
-  value: serializeAuthToken(token),
+await putSecretToken({
+  storeId,
+  name,
+  value: token.token,
+  remote: true,
 });
 
-console.log(`토큰 저장 완료: ${key}`);
+console.log(`토큰 저장 완료: ${name}`);
