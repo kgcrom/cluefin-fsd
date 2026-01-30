@@ -7,7 +7,7 @@ import type {
 
 const BASE_URLS: Record<BrokerEnv, string> = {
   production: "https://openapi.koreainvestment.com:9443",
-  mock: "https://openapivts.koreainvestment.com:29443",
+  dev: "https://openapivts.koreainvestment.com:29443",
 };
 
 export function createKisAuthClient(
@@ -32,8 +32,9 @@ export function createKisAuthClient(
       });
 
       if (!response.ok) {
+        const errorBody = await response.text();
         throw new Error(
-          `KIS token request failed: ${response.status} ${response.statusText}`,
+          `KIS token request failed: ${response.status} ${response.statusText}\n${errorBody}`,
         );
       }
 

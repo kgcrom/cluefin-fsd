@@ -9,6 +9,7 @@
       "name": "@cluefin/broker",
       "version": "0.0.1",
       "dependencies": {
+        "@cluefin/cloudflare": "workspace:*",
         "@cluefin/securities": "workspace:*",
       },
     },
@@ -29,6 +30,9 @@
     "packages/cloudflare": {
       "name": "@cluefin/cloudflare",
       "version": "0.0.1",
+      "dependencies": {
+        "@cluefin/securities": "workspace:*",
+      },
     },
     "packages/securities": {
       "name": "@cluefin/securities",

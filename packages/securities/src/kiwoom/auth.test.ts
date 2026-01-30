@@ -37,9 +37,9 @@ describe("createKiwoomAuthClient", () => {
     });
   });
 
-  describe("mock env", () => {
-    test("uses mock URL", async () => {
-      const client = createKiwoomAuthClient("mock");
+  describe("dev env", () => {
+    test("uses dev URL", async () => {
+      const client = createKiwoomAuthClient("dev");
       await client.getToken(credentials);
 
       expect(globalThis.fetch).toHaveBeenCalledWith(

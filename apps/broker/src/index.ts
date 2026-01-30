@@ -2,7 +2,9 @@ import {
   createKisAuthClient,
   createKiwoomAuthClient,
 } from "@cluefin/securities";
-import type { BrokerEnv } from "@cluefin/securities";
+import type { AuthToken, BrokerEnv } from "@cluefin/securities";
+import { brokerTokenKey, serializeAuthToken } from "@cluefin/cloudflare";
+import { putKvToken } from "./kv";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -16,11 +18,11 @@ function parseBrokerEnv(raw: string): BrokerEnv {
   switch (raw) {
     case "prod":
       return "production";
-    case "mock":
-      return "mock";
+    case "dev":
+      return "dev";
     default:
       throw new Error(
-        `잘못된 환경값: "${raw}". "prod" 또는 "mock"을 사용하세요.`,
+        `잘못된 환경값: "${raw}". "prod" 또는 "dev"를 사용하세요.`,
       );
   }
 }
@@ -32,20 +34,31 @@ if (!broker || !["kis", "kiwoom"].includes(broker)) {
   process.exit(1);
 }
 
+let token: AuthToken;
+
 if (broker === "kis") {
   const env = parseBrokerEnv(requireEnv("KIS_ENV"));
   const client = createKisAuthClient(env);
-  const token = await client.getToken({
+  token = await client.getToken({
     appkey: requireEnv("KIS_APP_KEY"),
     appsecret: requireEnv("KIS_SECRET_KEY"),
   });
-  console.log(token);
 } else {
   const env = parseBrokerEnv(requireEnv("KIWOOM_ENV"));
   const client = createKiwoomAuthClient(env);
-  const token = await client.getToken({
+  token = await client.getToken({
     appkey: requireEnv("KIWOOM_APP_KEY"),
     secretkey: requireEnv("KIWOOM_SECRET_KEY"),
   });
-  console.log(token);
 }
+
+const namespaceId = requireEnv("CLUEFIN_KV_NAMESPACE_ID");
+const key = brokerTokenKey(broker as "kis" | "kiwoom");
+
+await putKvToken({
+  namespaceId,
+  key,
+  value: serializeAuthToken(token),
+});
+
+console.log(`토큰 저장 완료: ${key}`);

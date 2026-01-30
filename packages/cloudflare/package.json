@@ -6,6 +6,9 @@
   "scripts": {
     "test": "bun test"
   },
+  "dependencies": {
+    "@cluefin/securities": "workspace:*"
+  },
   "exports": {
     ".": "./src/index.ts"
   }

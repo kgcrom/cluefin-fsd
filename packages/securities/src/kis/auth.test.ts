@@ -38,9 +38,9 @@ describe("createKisAuthClient", () => {
     });
   });
 
-  describe("mock env", () => {
-    test("uses mock URL", async () => {
-      const client = createKisAuthClient("mock");
+  describe("dev env", () => {
+    test("uses dev URL", async () => {
+      const client = createKisAuthClient("dev");
       await client.getToken(credentials);
 
       expect(globalThis.fetch).toHaveBeenCalledWith(

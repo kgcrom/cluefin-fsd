@@ -62,10 +62,10 @@ bun install
 
 | 변수 | 설명 | 값 |
 |---|---|---|
-| `KIS_ENV` | KIS 환경 설정 | `prod` \| `mock` |
+| `KIS_ENV` | KIS 환경 설정 | `prod` \| `dev` |
 | `KIS_APP_KEY` | KIS 앱 키 | 한국투자증권에서 발급 |
 | `KIS_SECRET_KEY` | KIS 시크릿 키 | 한국투자증권에서 발급 |
-| `KIWOOM_ENV` | 키움 환경 설정 | `prod` \| `mock` |
+| `KIWOOM_ENV` | 키움 환경 설정 | `prod` \| `dev` |
 | `KIWOOM_APP_KEY` | 키움 앱 키 | 키움증권에서 발급 |
 | `KIWOOM_SECRET_KEY` | 키움 시크릿 키 | 키움증권에서 발급 |
 

@@ -7,7 +7,7 @@ import type {
 
 const BASE_URLS: Record<BrokerEnv, string> = {
   production: "https://api.kiwoom.com",
-  mock: "https://mockapi.kiwoom.com",
+  dev: "https://mockapi.kiwoom.com",
 };
 
 export function createKiwoomAuthClient(
@@ -32,8 +32,9 @@ export function createKiwoomAuthClient(
       });
 
       if (!response.ok) {
+        const errorBody = await response.text();
         throw new Error(
-          `Kiwoom token request failed: ${response.status} ${response.statusText}`,
+          `Kiwoom token request failed: ${response.status} ${response.statusText}\n${errorBody}`,
         );
       }
 
