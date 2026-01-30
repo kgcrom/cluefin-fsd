@@ -26,6 +26,10 @@
         "@cluefin/securities": "workspace:*",
       },
     },
+    "packages/cloudflare": {
+      "name": "@cluefin/cloudflare",
+      "version": "0.0.1",
+    },
     "packages/securities": {
       "name": "@cluefin/securities",
       "version": "0.0.1",
@@ -33,6 +37,8 @@
   },
   "packages": {
     "@cluefin/broker": ["@cluefin/broker@workspace:apps/broker"],
+
+    "@cluefin/cloudflare": ["@cluefin/cloudflare@workspace:packages/cloudflare"],
 
     "@cluefin/scheduler": ["@cluefin/scheduler@workspace:apps/scheduler"],
 
