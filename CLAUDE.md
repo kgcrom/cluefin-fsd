@@ -25,7 +25,3 @@ Bun 워크스페이스 모노레포. 패키지 간 의존은 `workspace:*` 프�
 - 패키지마다 barrel export (`index.ts`에서 re-export)
 - 테스트는 Bun 내장 테스트 러너 (`*.test.ts`), `globalThis.fetch`를 `mock()`으로 대체하여 HTTP 호출 테스트
 - 날짜는 KST(+09:00) 기준으로 파싱 — 브로커별 날짜 포맷이 다름 (KIS: `yyyy-MM-dd HH:mm:ss`, Kiwoom: `yyyyMMddHHmmss`)
-
-## Rules
-
-- When ExitPlan is executed, describe the complexity of the plan and explain why you made that decision. If the plan is complex, execute TaskCreate and, if there are no blocks and tasks can be executed in parallel, use subagents to execute them in parallel.

@@ -1,5 +1,18 @@
 {
   "enabledPlugins": {
     "playground@claude-plugins-official": true
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && bun run check:fix",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
   }
 }
