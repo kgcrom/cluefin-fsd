@@ -1,5 +1,9 @@
 {
   "name": "cluefin-fsd",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"]
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "broker:kis": "bun run --filter @cluefin/broker start kis",
+    "broker:kiwoom": "bun run --filter @cluefin/broker start kiwoom"
+  }
 }
