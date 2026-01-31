@@ -26,30 +26,34 @@ async function runWrangler(args: string[]): Promise<RunResult> {
   return { exitCode, stdout, stderr };
 }
 
-async function listStores(remote?: boolean): Promise<string> {
-  const args = ["secrets-store", "store", "list"];
+async function listSecrets(
+  storeId: string,
+  remote?: boolean,
+): Promise<string> {
+  const args = ["secrets-store", "secret", "list", storeId];
   if (remote) args.push("--remote");
 
   const result = await runWrangler(args);
   if (result.exitCode !== 0) {
     throw new Error(
-      `wrangler secrets-store store list failed (exit ${result.exitCode}): ${result.stderr}`,
+      `wrangler secrets-store secret list failed (exit ${result.exitCode}): ${result.stderr}`,
     );
   }
   return result.stdout;
 }
 
-async function deleteStore(
+async function deleteSecret(
   storeId: string,
+  name: string,
   remote?: boolean,
 ): Promise<void> {
-  const args = ["secrets-store", "store", "delete", storeId];
+  const args = ["secrets-store", "secret", "delete", storeId, "--name", name];
   if (remote) args.push("--remote");
 
   const result = await runWrangler(args);
   if (result.exitCode !== 0) {
     throw new Error(
-      `wrangler secrets-store store delete failed (exit ${result.exitCode}): ${result.stderr}`,
+      `wrangler secrets-store secret delete failed (exit ${result.exitCode}): ${result.stderr}`,
     );
   }
 }
@@ -60,10 +64,10 @@ export async function putSecretToken({
   value,
   remote,
 }: PutSecretTokenOptions): Promise<void> {
-  const storeListOutput = await listStores(remote);
+  const secretListOutput = await listSecrets(storeId, remote);
 
-  if (storeListOutput.includes(storeId)) {
-    await deleteStore(storeId, remote);
+  if (secretListOutput.includes(name)) {
+    await deleteSecret(storeId, name, remote);
   }
 
   const args = [
