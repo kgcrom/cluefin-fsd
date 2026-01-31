@@ -37,6 +37,9 @@
       "dependencies": {
         "@cluefin/securities": "workspace:*",
       },
+      "devDependencies": {
+        "@types/bun": "^1.3.8",
+      },
     },
     "packages/securities": {
       "name": "@cluefin/securities",

@@ -3,8 +3,7 @@ import {
   createKiwoomAuthClient,
 } from "@cluefin/securities";
 import type { AuthToken, BrokerEnv } from "@cluefin/securities";
-import { brokerTokenSecretName } from "@cluefin/cloudflare";
-import { putSecretToken } from "./secret";
+import { brokerTokenSecretName, putSecretToken } from "@cluefin/cloudflare";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
