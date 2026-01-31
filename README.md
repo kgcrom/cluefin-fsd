@@ -90,10 +90,10 @@ CLUEFIN_SECRET_STORE_ID=<출력된 id 값>
 
 ```sh
 # KIS (한국투자증권)
-bun run --filter @cluefin/broker start kis
+bun run broker:kis
 
 # Kiwoom (키움증권)
-bun run --filter @cluefin/broker start kiwoom
+bun run broker:kiwoom
 ```
 
 ## Testing
@@ -103,7 +103,7 @@ bun run --filter @cluefin/broker start kiwoom
 bun test
 
 # securities 패키지 테스트
-bun test --filter @cluefin/securities
+bun test packages/securities
 ```
 
 ## Roadmap
