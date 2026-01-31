@@ -16,6 +16,9 @@ ClueFin FSD는 한국 증권사 Open API를 단일 인터페이스로 통합하�
 - [TypeScript](https://www.typescriptlang.org/)
 - [Bun](https://bun.sh/) (런타임 & 패키지 매니저)
 - Bun Workspaces (모노레포 관리)
+- [Hono](https://hono.dev/) (trader 웹 프레임워크)
+- [Cloudflare Workers](https://workers.cloudflare.com/) (trader 배포)
+- [Biome](https://biomejs.dev/) (lint & format)
 
 ## Project Structure
 
@@ -23,9 +26,10 @@ ClueFin FSD는 한국 증권사 Open API를 단일 인터페이스로 통합하�
 cluefin-fsd/
 ├── apps/
 │   ├── broker/          # 증권사 인증 CLI (@cluefin/broker)
-│   ├── trader/          # 주문 실행 서비스 (@cluefin/trader)
+│   ├── trader/          # 트레이딩 API 서비스 — Cloudflare Workers (@cluefin/trader)
 │   └── scheduler/       # 스케줄링 서비스 (@cluefin/scheduler)
 ├── packages/
+│   ├── cloudflare/      # Cloudflare 런타임 유틸리티 (@cluefin/cloudflare)
 │   └── securities/      # 증권사 API 클라이언트 라이브러리 (@cluefin/securities)
 ├── package.json
 └── tsconfig.json
@@ -34,8 +38,9 @@ cluefin-fsd/
 | 워크스페이스 | 설명 |
 |---|---|
 | `@cluefin/broker` | 증권사 인증 토큰 발급 CLI |
-| `@cluefin/trader` | 매매 주문 실행 (예정) |
+| `@cluefin/trader` | 트레이딩 API 서비스 (Hono + Cloudflare Workers) |
 | `@cluefin/scheduler` | 자동 매매 스케줄러 (예정) |
+| `@cluefin/cloudflare` | Cloudflare 런타임 유틸리티 (Secrets Store 등) |
 | `@cluefin/securities` | KIS/Kiwoom 증권사 API 클라이언트 라이브러리 |
 
 ## Getting Started
@@ -68,21 +73,6 @@ bun install
 | `KIWOOM_ENV` | 키움 환경 설정 | `prod` \| `dev` |
 | `KIWOOM_APP_KEY` | 키움 앱 키 | 키움증권에서 발급 |
 | `KIWOOM_SECRET_KEY` | 키움 시크릿 키 | 키움증권에서 발급 |
-| `CLUEFIN_SECRET_STORE_ID` | Cloudflare Secrets Store ID | wrangler로 생성 후 확인 |
-
-### Cloudflare Secrets Store 설정
-
-broker CLI에서 발급한 인증 토큰은 Cloudflare Secrets Store에 저장됩니다. 아래 명령으로 Secrets Store를 생성합니다.
-
-```sh
-npx wrangler secrets-store store create cluefin-fsd --remote
-```
-
-실행 결과로 출력되는 `id` 값을 `.env` 파일의 `CLUEFIN_SECRET_STORE_ID`에 설정합니다.
-
-```
-CLUEFIN_SECRET_STORE_ID=<출력된 id 값>
-```
 
 ## Usage
 
@@ -94,6 +84,42 @@ bun run broker:kis
 
 # Kiwoom (키움증권)
 bun run broker:kiwoom
+```
+
+### Lint & Format
+
+```sh
+# 전체 검사 (lint + format)
+bun run check
+
+# 자동 수정
+bun run check:fix
+
+# lint만
+bun run lint
+bun run lint:fix
+
+# format만
+bun run format
+bun run format:fix
+```
+
+### Trader 로컬 개발
+
+```sh
+# 1. .dev.vars 파일 생성
+cp apps/trader/.dev.vars.example apps/trader/.dev.vars
+
+# 2. .dev.vars에 한국투자증권 앱키 입력
+#    KIS_APP_KEY=<한국투자증권 앱키>
+#    KIS_SECRET_KEY=<한국투자증권 시크릿키>
+
+# 3. 토큰 발급 후 .dev.vars의 BROKER_TOKEN_KIS에 설정
+bun run broker:kis
+#    BROKER_TOKEN_KIS={"token":"..."}
+
+# 4. 로컬 서버 실행
+cd apps/trader && npx wrangler dev
 ```
 
 ## Testing
@@ -109,5 +135,6 @@ bun test packages/securities
 ## Roadmap
 
 - [x] 증권사 인증 클라이언트 (KIS, Kiwoom)
-- [ ] 매매 주문 실행 (trader)
+- [x] KIS 시세 조회 (인트라데이 차트)
+- [~] 트레이딩 API 서비스 (trader — 일부 구현)
 - [ ] 자동 매매 스케줄러 (scheduler)

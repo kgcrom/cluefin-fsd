@@ -4,12 +4,7 @@
   "main": "src/index.ts",
   "compatibility_date": "2025-01-01",
   "vars": {
-    "KIS_ENV": "production"
-  },
-  "secrets_stores": [
-    {
-      "binding": "SECRETS_STORE",
-      "store_id": "<CLUEFIN_SECRET_STORE_ID>"
-    }
-  ]
+    "KIS_ENV": "production",
+    "KIWOOM_ENV": "production"
+  }
 }

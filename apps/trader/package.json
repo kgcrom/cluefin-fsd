@@ -3,7 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
+  "scripts": {
+    "dev": "npx wrangler dev"
+  },
   "dependencies": {
-    "@cluefin/securities": "workspace:*"
+    "@cluefin/securities": "workspace:*",
+    "hono": "^4"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
   }
 }
