@@ -1,9 +1,6 @@
-import {
-  createKisAuthClient,
-  createKiwoomAuthClient,
-} from "@cluefin/securities";
-import type { AuthToken, BrokerEnv } from "@cluefin/securities";
 import { brokerTokenSecretName, putSecretToken } from "@cluefin/cloudflare";
+import type { AuthToken, BrokerEnv } from "@cluefin/securities";
+import { createKisAuthClient, createKiwoomAuthClient } from "@cluefin/securities";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -20,16 +17,16 @@ function parseBrokerEnv(raw: string): BrokerEnv {
     case "dev":
       return "dev";
     default:
-      throw new Error(
-        `잘못된 환경값: "${raw}". "prod" 또는 "dev"를 사용하세요.`,
-      );
+      throw new Error(`잘못된 환경값: "${raw}". "prod" 또는 "dev"를 사용하세요.`);
   }
 }
 
-const broker = process.argv[2];
+const args = process.argv.slice(2);
+const remote = args.includes("--remote");
+const broker = args.find((a) => !a.startsWith("--"));
 
 if (!broker || !["kis", "kiwoom"].includes(broker)) {
-  console.error("Usage: bun run src/index.ts <kis|kiwoom>");
+  console.error("Usage: bun run src/index.ts <kis|kiwoom> [--remote]");
   process.exit(1);
 }
 
@@ -58,7 +55,7 @@ await putSecretToken({
   storeId,
   name,
   value: token.token,
-  remote: true,
+  remote,
 });
 
 console.log(`토큰 저장 완료: ${name}`);

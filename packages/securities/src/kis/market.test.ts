@@ -1,4 +1,4 @@
-import { describe, test, expect, mock, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import { createKisMarketClient } from "./market";
 import type { KisIntradayChartParams } from "./types";
 
@@ -34,9 +34,7 @@ const rawResponse = {
 
 beforeEach(() => {
   globalThis.fetch = mock(() =>
-    Promise.resolve(
-      new Response(JSON.stringify(rawResponse), { status: 200 }),
-    ),
+    Promise.resolve(new Response(JSON.stringify(rawResponse), { status: 200 })),
   );
 });
 
@@ -60,8 +58,7 @@ describe("createKisMarketClient", () => {
       const client = createKisMarketClient("production");
       await client.getIntradayChart(credentials, token, params);
 
-      const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock
-        .calls[0];
+      const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
       const url = callArgs[0] as string;
 
       expect(url).toStartWith(
@@ -75,8 +72,7 @@ describe("createKisMarketClient", () => {
       const client = createKisMarketClient("dev");
       await client.getIntradayChart(credentials, token, params);
 
-      const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock
-        .calls[0];
+      const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
       const url = callArgs[0] as string;
 
       expect(url).toStartWith(
@@ -89,8 +85,7 @@ describe("createKisMarketClient", () => {
     const client = createKisMarketClient("production");
     await client.getIntradayChart(credentials, token, params);
 
-    const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock
-      .calls[0];
+    const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
     const init = callArgs[1] as RequestInit;
     const headers = init.headers as Record<string, string>;
 
@@ -107,8 +102,7 @@ describe("createKisMarketClient", () => {
     const client = createKisMarketClient("production");
     await client.getIntradayChart(credentials, token, params);
 
-    const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock
-      .calls[0];
+    const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
     const url = new URL(callArgs[0] as string);
 
     expect(url.searchParams.get("FID_COND_MRKT_DIV_CODE")).toBe("J");
@@ -152,15 +146,13 @@ describe("createKisMarketClient", () => {
 
   test("throws on HTTP error", async () => {
     globalThis.fetch = mock(() =>
-      Promise.resolve(
-        new Response("Forbidden", { status: 403, statusText: "Forbidden" }),
-      ),
+      Promise.resolve(new Response("Forbidden", { status: 403, statusText: "Forbidden" })),
     );
 
     const client = createKisMarketClient("production");
 
-    expect(
-      client.getIntradayChart(credentials, token, params),
-    ).rejects.toThrow("KIS intraday chart request failed: 403 Forbidden");
+    expect(client.getIntradayChart(credentials, token, params)).rejects.toThrow(
+      "KIS intraday chart request failed: 403 Forbidden",
+    );
   });
 });

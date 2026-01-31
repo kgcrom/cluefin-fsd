@@ -1,18 +1,12 @@
 import type { AuthClient, AuthToken, BrokerEnv } from "../types";
-import type {
-  KiwoomCredentials,
-  KiwoomTokenRequest,
-  KiwoomTokenResponse,
-} from "./types";
+import type { KiwoomCredentials, KiwoomTokenRequest, KiwoomTokenResponse } from "./types";
 
 const BASE_URLS: Record<BrokerEnv, string> = {
   production: "https://api.kiwoom.com",
   dev: "https://mockapi.kiwoom.com",
 };
 
-export function createKiwoomAuthClient(
-  env: BrokerEnv,
-): AuthClient<KiwoomCredentials> {
+export function createKiwoomAuthClient(env: BrokerEnv): AuthClient<KiwoomCredentials> {
   const baseUrl = BASE_URLS[env];
 
   return {

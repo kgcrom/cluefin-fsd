@@ -1,18 +1,12 @@
 import type { AuthClient, AuthToken, BrokerEnv } from "../types";
-import type {
-  KisCredentials,
-  KisTokenRequest,
-  KisTokenResponse,
-} from "./types";
+import type { KisCredentials, KisTokenRequest, KisTokenResponse } from "./types";
 
 const BASE_URLS: Record<BrokerEnv, string> = {
   production: "https://openapi.koreainvestment.com:9443",
   dev: "https://openapivts.koreainvestment.com:29443",
 };
 
-export function createKisAuthClient(
-  env: BrokerEnv,
-): AuthClient<KisCredentials> {
+export function createKisAuthClient(env: BrokerEnv): AuthClient<KisCredentials> {
   const baseUrl = BASE_URLS[env];
 
   return {

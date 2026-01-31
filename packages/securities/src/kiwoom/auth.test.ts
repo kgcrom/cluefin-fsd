@@ -1,4 +1,4 @@
-import { describe, test, expect, mock, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import { createKiwoomAuthClient } from "./auth";
 
 const originalFetch = globalThis.fetch;
@@ -53,8 +53,7 @@ describe("createKiwoomAuthClient", () => {
     const client = createKiwoomAuthClient("production");
     await client.getToken(credentials);
 
-    const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock
-      .calls[0];
+    const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
     const init = callArgs[1] as RequestInit;
 
     expect(init.method).toBe("POST");
@@ -67,8 +66,7 @@ describe("createKiwoomAuthClient", () => {
     const client = createKiwoomAuthClient("production");
     await client.getToken(credentials);
 
-    const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock
-      .calls[0];
+    const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
     const init = callArgs[1] as RequestInit;
     const body = JSON.parse(init.body as string);
 

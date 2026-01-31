@@ -26,15 +26,15 @@ async function runWrangler(args: string[]): Promise<RunResult> {
   return { exitCode, stdout, stderr };
 }
 
-async function listSecrets(
-  storeId: string,
-  remote?: boolean,
-): Promise<string> {
+async function listSecrets(storeId: string, remote?: boolean): Promise<string> {
   const args = ["secrets-store", "secret", "list", storeId];
   if (remote) args.push("--remote");
 
   const result = await runWrangler(args);
   if (result.exitCode !== 0) {
+    if (result.stderr.includes("returned no secrets")) {
+      return "";
+    }
     throw new Error(
       `wrangler secrets-store secret list failed (exit ${result.exitCode}): ${result.stderr}`,
     );
@@ -42,11 +42,7 @@ async function listSecrets(
   return result.stdout;
 }
 
-async function deleteSecret(
-  storeId: string,
-  name: string,
-  remote?: boolean,
-): Promise<void> {
+async function deleteSecret(storeId: string, name: string, remote?: boolean): Promise<void> {
   const args = ["secrets-store", "secret", "delete", storeId, "--name", name];
   if (remote) args.push("--remote");
 

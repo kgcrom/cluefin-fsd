@@ -1,9 +1,21 @@
 {
   "name": "cluefin-fsd",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "broker:kis": "bun run --filter @cluefin/broker start kis",
-    "broker:kiwoom": "bun run --filter @cluefin/broker start kiwoom"
+    "broker:kiwoom": "bun run --filter @cluefin/broker start kiwoom",
+    "lint": "biome lint .",
+    "format": "biome format .",
+    "check": "biome check .",
+    "lint:fix": "biome lint --write .",
+    "format:fix": "biome format --write .",
+    "check:fix": "biome check --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.13"
   }
 }

@@ -1,13 +1,9 @@
-import { describe, test, expect, mock, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import { putSecretToken } from "./secret";
 
 const originalSpawn = Bun.spawn;
 
-function createMockProc(
-  exitCode: number,
-  stdout: string,
-  stderr: string = "",
-) {
+function createMockProc(exitCode: number, stdout: string, stderr: string = "") {
   return {
     exited: Promise.resolve(exitCode),
     stdout: new Response(stdout).body!,
@@ -45,9 +41,7 @@ describe("putSecretToken", () => {
 
   test("secret이 목록에 존재하면 delete 후 create 실행", async () => {
     spawnMock
-      .mockReturnValueOnce(
-        createMockProc(0, "broker-token-kis\t2025-01-01"),
-      )
+      .mockReturnValueOnce(createMockProc(0, "broker-token-kis\t2025-01-01"))
       .mockReturnValueOnce(createMockProc(0, ""))
       .mockReturnValueOnce(createMockProc(0, ""));
 
@@ -96,9 +90,7 @@ describe("putSecretToken", () => {
 
   test("secret이 목록에 없으면 delete 없이 create 실행", async () => {
     spawnMock
-      .mockReturnValueOnce(
-        createMockProc(0, "other-secret\t2025-01-01"),
-      )
+      .mockReturnValueOnce(createMockProc(0, "other-secret\t2025-01-01"))
       .mockReturnValueOnce(createMockProc(0, ""));
 
     await putSecretToken(baseOptions);
@@ -114,9 +106,7 @@ describe("putSecretToken", () => {
 
   test("remote 옵션이 true이면 모든 명령에 --remote 추가", async () => {
     spawnMock
-      .mockReturnValueOnce(
-        createMockProc(0, "broker-token-kis\t2025-01-01"),
-      )
+      .mockReturnValueOnce(createMockProc(0, "broker-token-kis\t2025-01-01"))
       .mockReturnValueOnce(createMockProc(0, ""))
       .mockReturnValueOnce(createMockProc(0, ""));
 
@@ -133,9 +123,7 @@ describe("putSecretToken", () => {
   });
 
   test("secret list 실패 시 에러 throw", async () => {
-    spawnMock.mockReturnValueOnce(
-      createMockProc(1, "", "authentication error"),
-    );
+    spawnMock.mockReturnValueOnce(createMockProc(1, "", "authentication error"));
 
     expect(putSecretToken(baseOptions)).rejects.toThrow(
       "wrangler secrets-store secret list failed (exit 1): authentication error",
