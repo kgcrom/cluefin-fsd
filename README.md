@@ -110,16 +110,35 @@ bun run format:fix
 # 1. .dev.vars 파일 생성
 cp apps/trader/.dev.vars.example apps/trader/.dev.vars
 
-# 2. .dev.vars에 한국투자증권 앱키 입력
+# 2. .dev.vars에 증권사 앱키 입력
 #    KIS_APP_KEY=<한국투자증권 앱키>
 #    KIS_SECRET_KEY=<한국투자증권 시크릿키>
+#    KIWOOM_APP_KEY=<키움증권 앱키>
+#    KIWOOM_SECRET_KEY=<키움증권 시크릿키>
 
-# 3. 토큰 발급 후 .dev.vars의 BROKER_TOKEN_KIS에 설정
+# 3. 토큰 발급 후 .dev.vars에 설정
 bun run broker:kis
 #    BROKER_TOKEN_KIS={"token":"..."}
+bun run broker:kiwoom
+#    BROKER_TOKEN_KIWOOM=<토큰>
 
 # 4. 로컬 서버 실행
-cd apps/trader && npx wrangler dev
+cd apps/trader && bun run dev
+```
+
+### Trader API curl
+
+로컬 서버(`http://localhost:8787`) 기준 예시:
+
+```sh
+# KIS 인트라데이 차트
+curl "http://localhost:8787/kis/intraday-chart?market_code=J&stock_code=005930&input_hour=0900"
+
+# Kiwoom 외국인/기관 순위
+curl "http://localhost:8787/kiwoom/rank?mrkt_tp=000&amt_qty_tp=1&qry_dt_tp=0&stex_tp=1"
+
+# Kiwoom 거래량급증
+curl "http://localhost:8787/kiwoom/volume-surge?mrkt_tp=000&sort_tp=1&tm_tp=1&trde_qty_tp=5&stk_cnd=0&pric_tp=0&stex_tp=1"
 ```
 
 ## Testing
@@ -136,5 +155,6 @@ bun test packages/securities
 
 - [x] 증권사 인증 클라이언트 (KIS, Kiwoom)
 - [x] KIS 시세 조회 (인트라데이 차트)
+- [x] Kiwoom 시세 조회 (외국인/기관 순위, 거래량급증)
 - [~] 트레이딩 API 서비스 (trader — 일부 구현)
 - [ ] 자동 매매 스케줄러 (scheduler)
