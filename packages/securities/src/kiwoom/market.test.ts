@@ -5,7 +5,7 @@ import type { KiwoomRankParams, KiwoomVolumeSurgeParams } from "./types";
 const originalFetch = globalThis.fetch;
 
 const rawResponse = {
-  frg_orgn_trde_upper: [
+  frgnr_orgn_trde_upper: [
     {
       for_netslmt_stk_cd: "005930",
       for_netslmt_stk_nm: "삼성전자",
@@ -154,6 +154,17 @@ describe("createKiwoomMarketClient", () => {
       "Kiwoom rank request failed: 403 Forbidden",
     );
   });
+
+  test("returns empty array when response has no frgnr_orgn_trde_upper field", async () => {
+    globalThis.fetch = mock(() =>
+      Promise.resolve(new Response(JSON.stringify({}), { status: 200 })),
+    );
+
+    const client = createKiwoomMarketClient("production");
+    const result = await client.getRank(token, params);
+
+    expect(result.frgOrgnTrdeUpper).toEqual([]);
+  });
 });
 
 const volumeSurgeRawResponse = {
@@ -290,5 +301,16 @@ describe("getVolumeSurge", () => {
     expect(client.getVolumeSurge(token, volumeSurgeParams)).rejects.toThrow(
       "Kiwoom volume surge request failed: 403 Forbidden",
     );
+  });
+
+  test("returns empty array when response has no trde_qty_sdnin field", async () => {
+    globalThis.fetch = mock(() =>
+      Promise.resolve(new Response(JSON.stringify({}), { status: 200 })),
+    );
+
+    const client = createKiwoomMarketClient("production");
+    const result = await client.getVolumeSurge(token, volumeSurgeParams);
+
+    expect(result.trdeQtySdnin).toEqual([]);
   });
 });

@@ -58,11 +58,15 @@ app.get("/kiwoom/rank", async (c) => {
     stexTp: (c.req.query("stex_tp") ?? "1") as KiwoomRankParams["stexTp"],
   };
 
+  console.log("[kiwoom/rank] env:", env, "params:", JSON.stringify(params));
+
   try {
     const client = createKiwoomMarketClient(env);
     const result = await client.getRank(token, params);
+    console.log("[kiwoom/rank] result count:", result.frgOrgnTrdeUpper.length);
     return c.json(result);
   } catch (e) {
+    console.error("[kiwoom/rank] error:", e);
     return c.json({ error: e instanceof Error ? e.message : "Unknown error" }, 502);
   }
 });

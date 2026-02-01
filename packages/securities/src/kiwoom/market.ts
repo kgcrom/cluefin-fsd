@@ -41,7 +41,7 @@ interface RawRankItem {
 }
 
 interface RawRankResponse {
-  frg_orgn_trde_upper: RawRankItem[];
+  frgnr_orgn_trde_upper: RawRankItem[];
 }
 
 interface RawVolumeSurgeItem {
@@ -130,9 +130,10 @@ export function createKiwoomMarketClient(env: BrokerEnv): KiwoomMarketClient {
       }
 
       const data: RawRankResponse = await response.json();
+      console.log("[kiwoom/getRank] params:", JSON.stringify(body));
 
       return {
-        frgOrgnTrdeUpper: data.frg_orgn_trde_upper.map(mapRankItem),
+        frgOrgnTrdeUpper: (data.frgnr_orgn_trde_upper ?? []).map(mapRankItem),
       };
     },
 
@@ -173,7 +174,7 @@ export function createKiwoomMarketClient(env: BrokerEnv): KiwoomMarketClient {
       const data: RawVolumeSurgeResponse = await response.json();
 
       return {
-        trdeQtySdnin: data.trde_qty_sdnin.map(mapVolumeSurgeItem),
+        trdeQtySdnin: (data.trde_qty_sdnin ?? []).map(mapVolumeSurgeItem),
       };
     },
   };
