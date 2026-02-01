@@ -1,0 +1,94 @@
+# Apps
+
+ClueFin FSD 애플리케이션 모음.
+
+## Broker
+
+증권사 인증 토큰 발급 CLI. 루트 `.env` 파일의 환경변수를 읽어 토큰을 발급합니다.
+
+```sh
+cd apps/broker
+
+# KIS (한국투자증권)
+bun run start kis
+
+# Kiwoom (키움증권)
+bun run start kiwoom
+```
+
+## Trader
+
+Hono + Cloudflare Workers 기반 트레이딩 API 서비스.
+
+### D1 데이터베이스 설정
+
+Trader 앱은 Cloudflare D1을 사용하여 주문 데이터를 관리합니다.
+
+```sh
+# 0. apps/trader 이동
+cd apps/trader
+
+# 1. D1 데이터베이스 생성
+npx wrangler d1 create cluefin-fsd-db
+
+# 2. 출력된 database_id를 apps/trader/wrangler.jsonc에 입력
+#    "database_id": "<생성된 database_id>"
+
+# 3. 마이그레이션 실행 (리모트)
+npx wrangler d1 migrations apply cluefin-fsd-db --remote
+
+# 로컬 개발용 마이그레이션 실행
+npx wrangler d1 migrations apply cluefin-fsd-db --local
+```
+
+마이그레이션 파일은 `apps/trader/migrations/` 디렉토리에 위치합니다.
+
+새로운 마이그레이션을 추가하려면:
+
+```sh
+npx wrangler d1 migrations create cluefin-fsd-db <마이그레이션_이름>
+```
+
+### 로컬 개발
+
+```sh
+# 1. .dev.vars 파일 생성
+cp apps/trader/.dev.vars.example apps/trader/.dev.vars
+
+# 2. .dev.vars에 증권사 앱키 입력
+#    KIS_APP_KEY=<한국투자증권 앱키>
+#    KIS_SECRET_KEY=<한국투자증권 시크릿키>
+#    KIWOOM_APP_KEY=<키움증권 앱키>
+#    KIWOOM_SECRET_KEY=<키움증권 시크릿키>
+
+# 3. 토큰 발급 후 .dev.vars에 설정
+cd ../broker && bun run start kis
+#    BROKER_TOKEN_KIS={"token":"..."}
+bun run start kiwoom
+#    BROKER_TOKEN_KIWOOM=<토큰>
+
+# 4. 로컬 D1 마이그레이션 적용
+npx wrangler d1 migrations apply cluefin-fsd-db --local
+
+# 5. 로컬 서버 실행
+cd apps/trader && bun run dev
+```
+
+### API curl 예시
+
+로컬 서버(`http://localhost:8787`) 기준:
+
+```sh
+# KIS 인트라데이 차트
+curl "http://localhost:8787/kis/intraday-chart?market_code=J&stock_code=005930&input_hour=0900"
+
+# Kiwoom 외국인/기관 순위
+curl "http://localhost:8787/kiwoom/rank?mrkt_tp=000&amt_qty_tp=1&qry_dt_tp=0&stex_tp=1"
+
+# Kiwoom 거래량급증
+curl "http://localhost:8787/kiwoom/volume-surge?mrkt_tp=000&sort_tp=1&tm_tp=1&trde_qty_tp=5&stk_cnd=0&pric_tp=0&stex_tp=1"
+```
+
+## Scheduler
+
+자동 매매 스케줄러 (미구현).

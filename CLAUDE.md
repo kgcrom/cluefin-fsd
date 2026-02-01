@@ -8,15 +8,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 bun install                                    # 의존성 설치
 bun test                                       # 전체 테스트
 bun test packages/securities                   # securities 패키지 테스트만
-bun run broker:kis                             # KIS 인증 토큰 발급
-bun run broker:kiwoom                          # Kiwoom 인증 토큰 발급
 bun run check                                  # lint + format 검사
 bun run check:fix                              # lint + format 자동 수정
 bun run lint                                   # lint만 검사
 bun run format                                 # format만 검사
 ```
 
-broker CLI는 루트의 `.env` 파일을 `--env-file=../../.env`로 참조한다.
+broker CLI: `cd apps/broker && bun run start kis` (또는 `kiwoom`, `order`). 루트의 `.env` 파일을 `--env-file=../../.env`로 참조한다.
 
 trader 로컬 개발: `cd apps/trader && bun run dev`
 

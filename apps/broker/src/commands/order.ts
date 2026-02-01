@@ -3,6 +3,64 @@ import { WRANGLER_CONFIG } from "../utils";
 
 const DB_NAME = "cluefin-fsd-db";
 
+const ORDER_HELP = `Usage: broker order <command> [options]
+
+Commands:
+  add       주문 추가
+  list      주문 목록 조회
+  cancel    주문 취소
+
+각 명령의 상세 옵션은 --help 플래그로 확인:
+  broker order add --help`;
+
+const ADD_HELP = `Usage: broker order add [options]
+
+D1 trade_orders 테이블에 새 주문을 추가합니다.
+
+필수 옵션:
+  --stock-code <code>       종목코드 (예: 005930)
+  --side <buy|sell>         매수/매도 구분
+  --price <number>          기준가격
+  --qty <number>            수량
+  --broker <kis|kiwoom>     증권사
+
+선택 옵션:
+  --trailing-stop <pct>     트레일링 스탑 비율 (기본: 3.0)
+  --stock-name <name>       종목명 (예: 삼성전자)
+  --volume-threshold <n>    거래량 임계값
+  --memo <text>             메모
+  -h, --help                도움말 출력
+
+예시:
+  broker order add --stock-code 005930 --side buy --price 70000 --qty 10 --broker kis
+  broker order add --stock-code 005930 --side buy --price 70000 --qty 10 --broker kis --stock-name 삼성전자 --trailing-stop 5.0`;
+
+const LIST_HELP = `Usage: broker order list [options]
+
+주문 목록을 조회합니다. 최신순으로 정렬됩니다.
+
+선택 옵션:
+  --broker <kis|kiwoom>                          증권사 필터
+  --status <pending|monitoring|executed|cancelled> 상태 필터
+  -h, --help                                     도움말 출력
+
+예시:
+  broker order list
+  broker order list --broker kis --status pending`;
+
+const CANCEL_HELP = `Usage: broker order cancel <id>
+
+주문 상태를 cancelled로 변경합니다.
+
+인자:
+  id    취소할 주문 ID (숫자)
+
+옵션:
+  -h, --help    도움말 출력
+
+예시:
+  broker order cancel 3`;
+
 async function execD1(sql: string): Promise<string> {
   const proc = Bun.spawn(
     ["bunx", "wrangler", "d1", "execute", DB_NAME, "--command", sql, "--config", WRANGLER_CONFIG],
@@ -38,9 +96,15 @@ async function addOrder(args: string[]): Promise<void> {
       "trailing-stop": { type: "string" },
       "volume-threshold": { type: "string" },
       memo: { type: "string" },
+      help: { type: "boolean", short: "h" },
     },
     strict: true,
   });
+
+  if (values.help) {
+    console.log(ADD_HELP);
+    process.exit(0);
+  }
 
   const stockCode = values["stock-code"];
   const side = values.side;
@@ -49,12 +113,7 @@ async function addOrder(args: string[]): Promise<void> {
   const broker = values.broker;
 
   if (!stockCode || !side || !price || !qty || !broker) {
-    console.error(
-      "Usage: order add --stock-code <code> --side <buy|sell> --price <n> --qty <n> --broker <kis|kiwoom>",
-    );
-    console.error(
-      "  옵션: --trailing-stop <pct> --volume-threshold <n> --stock-name <name> --memo <memo>",
-    );
+    console.error(ADD_HELP);
     process.exit(1);
   }
 
@@ -114,9 +173,15 @@ async function listOrders(args: string[]): Promise<void> {
     options: {
       broker: { type: "string" },
       status: { type: "string" },
+      help: { type: "boolean", short: "h" },
     },
     strict: true,
   });
+
+  if (values.help) {
+    console.log(LIST_HELP);
+    process.exit(0);
+  }
 
   let sql = "SELECT * FROM trade_orders";
   const conditions: string[] = [];
@@ -138,9 +203,14 @@ async function listOrders(args: string[]): Promise<void> {
 }
 
 async function cancelOrder(args: string[]): Promise<void> {
+  if (args.includes("--help") || args.includes("-h")) {
+    console.log(CANCEL_HELP);
+    process.exit(0);
+  }
+
   const id = args[0];
   if (!id || Number.isNaN(Number(id))) {
-    console.error("Usage: order cancel <id>");
+    console.error(CANCEL_HELP);
     process.exit(1);
   }
 
@@ -154,6 +224,11 @@ export async function runOrder(args: string[]): Promise<void> {
   const subcommand = args[0];
   const rest = args.slice(1);
 
+  if (!subcommand || subcommand === "--help" || subcommand === "-h") {
+    console.log(ORDER_HELP);
+    process.exit(0);
+  }
+
   switch (subcommand) {
     case "add":
       return addOrder(rest);
@@ -162,10 +237,7 @@ export async function runOrder(args: string[]): Promise<void> {
     case "cancel":
       return cancelOrder(rest);
     default:
-      console.error("Usage: order <add|list|cancel> [options]");
-      console.error("  add    — 주문 추가");
-      console.error("  list   — 주문 목록 조회");
-      console.error("  cancel — 주문 취소");
+      console.error(ORDER_HELP);
       process.exit(1);
   }
 }

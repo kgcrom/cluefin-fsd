@@ -6,9 +6,6 @@
     "packages/*"
   ],
   "scripts": {
-    "broker:kis": "bun run --filter @cluefin/broker start kis",
-    "broker:kiwoom": "bun run --filter @cluefin/broker start kiwoom",
-    "broker:order": "bun run --filter @cluefin/broker start order",
     "lint": "biome lint .",
     "format": "biome format .",
     "check": "biome check .",
