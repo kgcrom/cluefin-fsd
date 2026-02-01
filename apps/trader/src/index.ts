@@ -1,7 +1,10 @@
 import {
   type BrokerEnv,
   createKisMarketClient,
+  createKiwoomMarketClient,
   type KisIntradayChartParams,
+  type KiwoomRankParams,
+  type KiwoomVolumeSurgeParams,
 } from "@cluefin/securities";
 import { Hono } from "hono";
 import type { Env } from "./bindings";
@@ -34,6 +37,57 @@ app.get("/kis/intraday-chart", async (c) => {
   try {
     const client = createKisMarketClient(env);
     const result = await client.getIntradayChart(credentials, token, params);
+    return c.json(result);
+  } catch (e) {
+    return c.json({ error: e instanceof Error ? e.message : "Unknown error" }, 502);
+  }
+});
+
+app.get("/kiwoom/rank", async (c) => {
+  const token = c.env.BROKER_TOKEN_KIWOOM;
+  if (!token) {
+    return c.json({ error: "Kiwoom 토큰이 설정되지 않았습니다" }, 401);
+  }
+
+  const env = c.env.KIWOOM_ENV as BrokerEnv;
+  const params: KiwoomRankParams = {
+    mrktTp: (c.req.query("mrkt_tp") ?? "000") as KiwoomRankParams["mrktTp"],
+    amtQtyTp: (c.req.query("amt_qty_tp") ?? "1") as KiwoomRankParams["amtQtyTp"],
+    qryDtTp: (c.req.query("qry_dt_tp") ?? "0") as KiwoomRankParams["qryDtTp"],
+    date: c.req.query("date"),
+    stexTp: (c.req.query("stex_tp") ?? "1") as KiwoomRankParams["stexTp"],
+  };
+
+  try {
+    const client = createKiwoomMarketClient(env);
+    const result = await client.getRank(token, params);
+    return c.json(result);
+  } catch (e) {
+    return c.json({ error: e instanceof Error ? e.message : "Unknown error" }, 502);
+  }
+});
+
+app.get("/kiwoom/volume-surge", async (c) => {
+  const token = c.env.BROKER_TOKEN_KIWOOM;
+  if (!token) {
+    return c.json({ error: "Kiwoom 토큰이 설정되지 않았습니다" }, 401);
+  }
+
+  const env = c.env.KIWOOM_ENV as BrokerEnv;
+  const params: KiwoomVolumeSurgeParams = {
+    mrktTp: (c.req.query("mrkt_tp") ?? "000") as KiwoomVolumeSurgeParams["mrktTp"],
+    sortTp: (c.req.query("sort_tp") ?? "1") as KiwoomVolumeSurgeParams["sortTp"],
+    tmTp: (c.req.query("tm_tp") ?? "1") as KiwoomVolumeSurgeParams["tmTp"],
+    trdeQtyTp: c.req.query("trde_qty_tp") ?? "",
+    tm: c.req.query("tm"),
+    stkCnd: c.req.query("stk_cnd") ?? "",
+    pricTp: c.req.query("pric_tp") ?? "",
+    stexTp: (c.req.query("stex_tp") ?? "1") as KiwoomVolumeSurgeParams["stexTp"],
+  };
+
+  try {
+    const client = createKiwoomMarketClient(env);
+    const result = await client.getVolumeSurge(token, params);
     return c.json(result);
   } catch (e) {
     return c.json({ error: e instanceof Error ? e.message : "Unknown error" }, 502);
