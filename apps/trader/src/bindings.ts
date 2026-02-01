@@ -7,4 +7,5 @@ export interface Env {
   KIWOOM_SECRET_KEY: string;
   KIWOOM_ENV: string;
   BROKER_TOKEN_KIWOOM: string;
+  DB: D1Database;
 }

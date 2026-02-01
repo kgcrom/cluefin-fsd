@@ -1,3 +1,5 @@
+import type { OrderBroker } from "@cluefin/cloudflare";
+import { createOrderRepository } from "@cluefin/cloudflare";
 import {
   type BrokerEnv,
   createKisMarketClient,
@@ -10,6 +12,31 @@ import { Hono } from "hono";
 import type { Env } from "./bindings";
 
 const app = new Hono<{ Bindings: Env }>();
+
+app.get("/orders", async (c) => {
+  const broker = c.req.query("broker") as OrderBroker | undefined;
+  if (broker && !["kis", "kiwoom"].includes(broker)) {
+    return c.json({ error: 'broker는 "kis" 또는 "kiwoom"이어야 합니다' }, 400);
+  }
+
+  const repo = createOrderRepository(c.env.DB);
+  const orders = await repo.getActiveOrders(broker);
+  return c.json(orders);
+});
+
+app.get("/orders/:id", async (c) => {
+  const id = Number(c.req.param("id"));
+  if (Number.isNaN(id)) {
+    return c.json({ error: "잘못된 주문 ID입니다" }, 400);
+  }
+
+  const repo = createOrderRepository(c.env.DB);
+  const order = await repo.getOrderById(id);
+  if (!order) {
+    return c.json({ error: "주문을 찾을 수 없습니다" }, 404);
+  }
+  return c.json(order);
+});
 
 app.get("/kis/intraday-chart", async (c) => {
   const raw = c.env.BROKER_TOKEN_KIS;
