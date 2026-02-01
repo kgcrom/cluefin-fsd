@@ -14,3 +14,62 @@ export interface KiwoomTokenResponse {
   token_type: string;
   token: string;
 }
+
+export interface KiwoomRankParams {
+  mrktTp: "000" | "001" | "101";
+  amtQtyTp: "1" | "2";
+  qryDtTp: "0" | "1";
+  date?: string;
+  stexTp: "1" | "2" | "3";
+}
+
+export interface KiwoomRankItem {
+  forNetslmtStkCd: string;
+  forNetslmtStkNm: string;
+  forNetslmtAmt: string;
+  forNetslmtQty: string;
+  forNetprpsStkCd: string;
+  forNetprpsStkNm: string;
+  forNetprpsAmt: string;
+  forNetprpsQty: string;
+  orgnNetslmtStkCd: string;
+  orgnNetslmtStkNm: string;
+  orgnNetslmtAmt: string;
+  orgnNetslmtQty: string;
+  orgnNetprpsStkCd: string;
+  orgnNetprpsStkNm: string;
+  orgnNetprpsAmt: string;
+  orgnNetprpsQty: string;
+}
+
+export interface KiwoomRankResponse {
+  frgOrgnTrdeUpper: KiwoomRankItem[];
+}
+
+export interface KiwoomVolumeSurgeParams {
+  mrktTp: "000" | "001" | "101";
+  sortTp: "1" | "2" | "3" | "4";
+  tmTp: "1" | "2";
+  trdeQtyTp: string;
+  tm?: string;
+  stkCnd: string;
+  pricTp: string;
+  stexTp: "1" | "2" | "3";
+}
+
+export interface KiwoomVolumeSurgeItem {
+  stkCd: string;
+  stkNm: string;
+  curPrc: string;
+  predPreSig: string;
+  predPre: string;
+  fluRt: string;
+  prevTrdeQty: string;
+  nowTrdeQty: string;
+  sdninQty: string;
+  sdninRt: string;
+}
+
+export interface KiwoomVolumeSurgeResponse {
+  trdeQtySdnin: KiwoomVolumeSurgeItem[];
+}

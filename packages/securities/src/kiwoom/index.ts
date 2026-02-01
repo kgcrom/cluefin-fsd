@@ -1,2 +1,12 @@
 export { createKiwoomAuthClient } from "./auth";
-export type { KiwoomCredentials, KiwoomTokenResponse } from "./types";
+export { createKiwoomMarketClient } from "./market";
+export type {
+  KiwoomCredentials,
+  KiwoomRankItem,
+  KiwoomRankParams,
+  KiwoomRankResponse,
+  KiwoomTokenResponse,
+  KiwoomVolumeSurgeItem,
+  KiwoomVolumeSurgeParams,
+  KiwoomVolumeSurgeResponse,
+} from "./types";

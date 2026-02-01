@@ -10,7 +10,14 @@ export {
 } from "./kis";
 export {
   createKiwoomAuthClient,
+  createKiwoomMarketClient,
   type KiwoomCredentials,
+  type KiwoomRankItem,
+  type KiwoomRankParams,
+  type KiwoomRankResponse,
   type KiwoomTokenResponse,
+  type KiwoomVolumeSurgeItem,
+  type KiwoomVolumeSurgeParams,
+  type KiwoomVolumeSurgeResponse,
 } from "./kiwoom";
 export type { AuthClient, AuthToken, BrokerEnv } from "./types";
