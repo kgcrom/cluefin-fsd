@@ -1,7 +1,7 @@
 import { parseArgs } from "node:util";
 import { WRANGLER_CONFIG } from "../utils";
 
-const DB_NAME = "cluefin-db";
+const DB_NAME = "cluefin-fsd-db";
 
 async function execD1(sql: string): Promise<string> {
   const proc = Bun.spawn(

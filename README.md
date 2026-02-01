@@ -104,6 +104,35 @@ bun run format
 bun run format:fix
 ```
 
+### D1 데이터베이스 설정
+
+Trader 앱은 Cloudflare D1을 사용하여 주문 데이터를 관리합니다.
+
+```sh
+# 0. apps/trader 이동
+cd apps/trader
+
+# 1. D1 데이터베이스 생성
+npx wrangler d1 create cluefin-fsd-db
+
+# 2. 출력된 database_id를 apps/trader/wrangler.jsonc에 입력
+#    "database_id": "<생성된 database_id>"
+
+# 3. 마이그레이션 실행 (리모트)
+npx wrangler d1 migrations apply cluefin-fsd-db --remote
+
+# 로컬 개발용 마이그레이션 실행
+npx wrangler d1 migrations apply cluefin-fsd-db --local
+```
+
+마이그레이션 파일은 `apps/trader/migrations/` 디렉토리에 위치합니다.
+
+새로운 마이그레이션을 추가하려면:
+
+```sh
+npx wrangler d1 migrations create cluefin-fsd-db <마이그레이션_이름>
+```
+
 ### Trader 로컬 개발
 
 ```sh
@@ -122,7 +151,10 @@ bun run broker:kis
 bun run broker:kiwoom
 #    BROKER_TOKEN_KIWOOM=<토큰>
 
-# 4. 로컬 서버 실행
+# 4. 로컬 D1 마이그레이션 적용
+npx wrangler d1 migrations apply cluefin-fsd-db --local
+
+# 5. 로컬 서버 실행
 cd apps/trader && bun run dev
 ```
 

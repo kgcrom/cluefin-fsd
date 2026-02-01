@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "cluefin-trader",
+  "name": "cluefin-fsd-trader",
   "main": "src/index.ts",
   "compatibility_date": "2025-01-01",
   "vars": {
@@ -9,10 +9,9 @@
   },
   "d1_databases": [
     {
-      "binding": "DB",
-      "database_name": "cluefin-db",
-      "database_id": "<생성 후 입력>",
-      "migrations_dir": "migrations"
+      "binding": "cluefin_fsd_db",
+      "database_name": "cluefin-fsd-db",
+      "database_id": "07fbb599-a7ed-48c7-890e-5533383a881c"
     }
   ]
 }

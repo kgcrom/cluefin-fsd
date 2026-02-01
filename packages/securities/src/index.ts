@@ -1,16 +1,22 @@
 export {
   createKisAuthClient,
   createKisMarketClient,
+  createKisTradingClient,
   type KisCredentials,
   type KisIntradayChartOutput1,
   type KisIntradayChartOutput2,
   type KisIntradayChartParams,
   type KisIntradayChartResponse,
+  type KisOrderParams,
+  type KisOrderResponse,
   type KisTokenResponse,
 } from "./kis";
 export {
   createKiwoomAuthClient,
   createKiwoomMarketClient,
+  createKiwoomOrderClient,
+  type KiwoomBuyOrderParams,
+  type KiwoomBuyOrderResponse,
   type KiwoomCredentials,
   type KiwoomRankItem,
   type KiwoomRankParams,

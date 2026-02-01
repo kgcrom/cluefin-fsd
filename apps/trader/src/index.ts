@@ -3,8 +3,12 @@ import { createOrderRepository } from "@cluefin/cloudflare";
 import {
   type BrokerEnv,
   createKisMarketClient,
+  createKisTradingClient,
   createKiwoomMarketClient,
+  createKiwoomOrderClient,
   type KisIntradayChartParams,
+  type KisOrderParams,
+  type KiwoomBuyOrderParams,
   type KiwoomRankParams,
   type KiwoomVolumeSurgeParams,
 } from "@cluefin/securities";
@@ -120,6 +124,112 @@ app.get("/kiwoom/volume-surge", async (c) => {
     const client = createKiwoomMarketClient(env);
     const result = await client.getVolumeSurge(token, params);
     return c.json(result);
+  } catch (e) {
+    return c.json({ error: e instanceof Error ? e.message : "Unknown error" }, 502);
+  }
+});
+
+app.post("/kis/order", async (c) => {
+  const token = c.env.BROKER_TOKEN_KIS;
+  if (!token) {
+    return c.json({ error: "KIS 토큰이 설정되지 않았습니다" }, 401);
+  }
+
+  const env = c.env.KIS_ENV as BrokerEnv;
+  const credentials = {
+    appkey: c.env.KIS_APP_KEY,
+    appsecret: c.env.KIS_SECRET_KEY,
+  };
+
+  const body = await c.req.json<{
+    side: "buy" | "sell";
+    stockCode: string;
+    orderType: string;
+    quantity: string;
+    price: string;
+    accountNo: string;
+    accountProductCode: string;
+  }>();
+
+  if (!body.side || !["buy", "sell"].includes(body.side)) {
+    return c.json({ error: 'side는 "buy" 또는 "sell"이어야 합니다' }, 400);
+  }
+
+  const orderParams: KisOrderParams = {
+    accountNo: body.accountNo,
+    accountProductCode: body.accountProductCode,
+    stockCode: body.stockCode,
+    orderType: body.orderType,
+    quantity: body.quantity,
+    price: body.price,
+  };
+
+  // TODO: 시장 데이터 수집 및 매매 판단 로직
+  const shouldExecute = true;
+
+  if (!shouldExecute) {
+    return c.json({ message: "주문 조건이 충족되지 않았습니다", executed: false });
+  }
+
+  try {
+    const client = createKisTradingClient(env);
+    const result =
+      body.side === "buy"
+        ? await client.buyOrder(credentials, token, orderParams)
+        : await client.sellOrder(credentials, token, orderParams);
+    return c.json({ executed: true, result });
+  } catch (e) {
+    return c.json({ error: e instanceof Error ? e.message : "Unknown error" }, 502);
+  }
+});
+
+app.post("/kiwoom/order", async (c) => {
+  const token = c.env.BROKER_TOKEN_KIWOOM;
+  if (!token) {
+    return c.json({ error: "Kiwoom 토큰이 설정되지 않았습니다" }, 401);
+  }
+
+  const env = c.env.KIWOOM_ENV as BrokerEnv;
+
+  const body = await c.req.json<{
+    side: "buy" | "sell";
+    stkCd: string;
+    ordQty: string;
+    trdeTp: string;
+    dmstStexTp: string;
+    ordUv?: string;
+    condUv?: string;
+  }>();
+
+  if (!body.side || !["buy", "sell"].includes(body.side)) {
+    return c.json({ error: 'side는 "buy" 또는 "sell"이어야 합니다' }, 400);
+  }
+
+  // TODO: 시장 데이터 수집 및 매매 판단 로직
+  const shouldExecute = true;
+
+  if (!shouldExecute) {
+    return c.json({ message: "주문 조건이 충족되지 않았습니다", executed: false });
+  }
+
+  if (body.side === "sell") {
+    // TODO: Kiwoom 매도 주문 구현
+    return c.json({ error: "Kiwoom 매도 주문은 아직 지원되지 않습니다" }, 501);
+  }
+
+  const orderParams: KiwoomBuyOrderParams = {
+    stkCd: body.stkCd,
+    ordQty: body.ordQty,
+    trdeTp: body.trdeTp,
+    dmstStexTp: body.dmstStexTp,
+    ordUv: body.ordUv,
+    condUv: body.condUv,
+  };
+
+  try {
+    const client = createKiwoomOrderClient(env);
+    const result = await client.buyOrder(token, orderParams);
+    return c.json({ executed: true, result });
   } catch (e) {
     return c.json({ error: e instanceof Error ? e.message : "Unknown error" }, 502);
   }
