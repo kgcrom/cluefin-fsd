@@ -73,3 +73,17 @@ export interface KiwoomVolumeSurgeItem {
 export interface KiwoomVolumeSurgeResponse {
   trdeQtySdnin: KiwoomVolumeSurgeItem[];
 }
+
+export interface KiwoomBuyOrderParams {
+  dmstStexTp: string;
+  stkCd: string;
+  ordQty: string;
+  ordUv?: string;
+  trdeTp: string;
+  condUv?: string;
+}
+
+export interface KiwoomBuyOrderResponse {
+  ordNo: string;
+  dmstStexTp: string;
+}
