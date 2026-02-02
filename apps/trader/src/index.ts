@@ -23,7 +23,7 @@ app.get("/orders", async (c) => {
     return c.json({ error: 'broker는 "kis" 또는 "kiwoom"이어야 합니다' }, 400);
   }
 
-  const repo = createOrderRepository(c.env.DB);
+  const repo = createOrderRepository(c.env.cluefin_fsd_db);
   const orders = await repo.getActiveOrders(broker);
   return c.json(orders);
 });
@@ -34,7 +34,7 @@ app.get("/orders/:id", async (c) => {
     return c.json({ error: "잘못된 주문 ID입니다" }, 400);
   }
 
-  const repo = createOrderRepository(c.env.DB);
+  const repo = createOrderRepository(c.env.cluefin_fsd_db);
   const order = await repo.getOrderById(id);
   if (!order) {
     return c.json({ error: "주문을 찾을 수 없습니다" }, 404);
@@ -235,4 +235,9 @@ app.post("/kiwoom/order", async (c) => {
   }
 });
 
-export default app;
+import { handleScheduled } from "./cron";
+
+export default {
+  fetch: app.fetch,
+  scheduled: handleScheduled,
+};

@@ -18,7 +18,7 @@ bun run start kiwoom
 
 ## Trader
 
-Hono + Cloudflare Workers 기반 트레이딩 API 서비스.
+Hono + Cloudflare Workers 기반 트레이딩 API + 자동 매매 Cron 서비스.
 
 ### D1 데이터베이스 설정
 
@@ -55,9 +55,11 @@ npx wrangler d1 migrations create cluefin-fsd-db <마이그레이션_이름>
 # 1. .dev.vars 파일 생성
 cp apps/trader/.dev.vars.example apps/trader/.dev.vars
 
-# 2. .dev.vars에 증권사 앱키 입력
+# 2. .dev.vars에 증권사 앱키 및 계좌 정보 입력
 #    KIS_APP_KEY=<한국투자증권 앱키>
 #    KIS_SECRET_KEY=<한국투자증권 시크릿키>
+#    KIS_ACCOUNT_NO=<계좌번호 앞 8자리>
+#    KIS_ACCOUNT_PRODUCT_CODE=<계좌 상품코드 뒤 2자리>
 #    KIWOOM_APP_KEY=<키움증권 앱키>
 #    KIWOOM_SECRET_KEY=<키움증권 시크릿키>
 
@@ -89,6 +91,21 @@ curl "http://localhost:8787/kiwoom/rank?mrkt_tp=000&amt_qty_tp=1&qry_dt_tp=0&ste
 curl "http://localhost:8787/kiwoom/volume-surge?mrkt_tp=000&sort_tp=1&tm_tp=1&trde_qty_tp=5&stk_cnd=0&pric_tp=0&stex_tp=1"
 ```
 
-## Scheduler
+### Cron 자동 매매
 
-자동 매매 스케줄러 (미구현).
+Trader는 Cloudflare Workers Cron Triggers를 통해 자동 매매를 실행합니다.
+
+| KST 시간 | 동작 | 간격 |
+|-----------|------|------|
+| 09:10~15:00 (평일) | `trade_orders` 기반 주문 실행 | 5분 |
+| 16:00~17:59 (평일) | 체결 정보 갱신 (미구현) | 1분 |
+
+`broker CLI`의 `order add`로 등록된 주문(`trade_orders`)을 cron이 읽어 증권사에 주문을 보내고, 실행 내역을 `trade_executions` 테이블에 기록합니다.
+
+로컬에서 cron을 수동 트리거하려면:
+
+```sh
+cd apps/trader && bun run dev
+curl "http://localhost:8787/__scheduled?cron=*+*+*+*+*"
+```
+

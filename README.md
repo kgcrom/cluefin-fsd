@@ -26,8 +26,7 @@ ClueFin FSD는 한국 증권사 Open API를 단일 인터페이스로 통합하�
 cluefin-fsd/
 ├── apps/
 │   ├── broker/          # 증권사 인증 CLI (@cluefin/broker)
-│   ├── trader/          # 트레이딩 API 서비스 — Cloudflare Workers (@cluefin/trader)
-│   └── scheduler/       # 스케줄링 서비스 (@cluefin/scheduler)
+│   └── trader/          # 트레이딩 API + 자동 매매 Cron — Cloudflare Workers (@cluefin/trader)
 ├── packages/
 │   ├── cloudflare/      # Cloudflare 런타임 유틸리티 (@cluefin/cloudflare)
 │   └── securities/      # 증권사 API 클라이언트 라이브러리 (@cluefin/securities)
@@ -38,8 +37,7 @@ cluefin-fsd/
 | 워크스페이스 | 설명 |
 |---|---|
 | `@cluefin/broker` | 증권사 인증 토큰 발급 CLI |
-| `@cluefin/trader` | 트레이딩 API 서비스 (Hono + Cloudflare Workers) |
-| `@cluefin/scheduler` | 자동 매매 스케줄러 (예정) |
+| `@cluefin/trader` | 트레이딩 API + 자동 매매 Cron (Hono + Cloudflare Workers) |
 | `@cluefin/cloudflare` | Cloudflare 런타임 유틸리티 (Secrets Store 등) |
 | `@cluefin/securities` | KIS/Kiwoom 증권사 API 클라이언트 라이브러리 |
 
@@ -70,6 +68,8 @@ bun install
 | `KIS_ENV` | KIS 환경 설정 | `prod` \| `dev` |
 | `KIS_APP_KEY` | KIS 앱 키 | 한국투자증권에서 발급 |
 | `KIS_SECRET_KEY` | KIS 시크릿 키 | 한국투자증권에서 발급 |
+| `KIS_ACCOUNT_NO` | KIS 계좌번호 (앞 8자리) | 한국투자증권 계좌 |
+| `KIS_ACCOUNT_PRODUCT_CODE` | KIS 계좌 상품코드 (뒤 2자리) | 한국투자증권 계좌 |
 | `KIWOOM_ENV` | 키움 환경 설정 | `prod` \| `dev` |
 | `KIWOOM_APP_KEY` | 키움 앱 키 | 키움증권에서 발급 |
 | `KIWOOM_SECRET_KEY` | 키움 시크릿 키 | 키움증권에서 발급 |
@@ -112,4 +112,4 @@ bun test packages/securities
 - [x] KIS 시세 조회 (인트라데이 차트)
 - [x] Kiwoom 시세 조회 (외국인/기관 순위, 거래량급증)
 - [~] 트레이딩 API 서비스 (trader — 일부 구현)
-- [ ] 자동 매매 스케줄러 (scheduler)
+- [~] 자동 매매 Cron (trader — 주문 실행 구현, 체결 조회 미구현)

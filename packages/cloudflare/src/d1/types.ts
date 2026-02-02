@@ -34,6 +34,47 @@ export interface TradeOrderRow {
   updated_at: string;
 }
 
+export type ExecutionStatus = "ordered" | "filled" | "partial" | "rejected";
+
+export interface TradeExecution {
+  id: number;
+  orderId: number;
+  brokerOrderId: string;
+  requestedQty: number;
+  requestedPrice: number;
+  filledQty: number | null;
+  filledPrice: number | null;
+  status: ExecutionStatus;
+  broker: OrderBroker;
+  brokerResponse: string | null;
+  orderedAt: string;
+  filledAt: string | null;
+}
+
+export interface TradeExecutionRow {
+  id: number;
+  order_id: number;
+  broker_order_id: string;
+  requested_qty: number;
+  requested_price: number;
+  filled_qty: number | null;
+  filled_price: number | null;
+  status: ExecutionStatus;
+  broker: OrderBroker;
+  broker_response: string | null;
+  ordered_at: string;
+  filled_at: string | null;
+}
+
+export interface CreateTradeExecutionInput {
+  orderId: number;
+  brokerOrderId: string;
+  requestedQty: number;
+  requestedPrice: number;
+  broker: OrderBroker;
+  brokerResponse?: string;
+}
+
 export interface CreateTradeOrderInput {
   stockCode: string;
   stockName?: string;
