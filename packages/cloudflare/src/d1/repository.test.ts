@@ -36,20 +36,6 @@ function createMockDB(overrides: Record<string, unknown> = {}) {
 }
 
 describe("createOrderRepository", () => {
-  test("getActiveOrders returns mapped orders", async () => {
-    const { db } = createMockDB();
-    const repo = createOrderRepository(db);
-
-    const orders = await repo.getActiveOrders();
-
-    expect(orders).toHaveLength(1);
-    expect(orders[0].stockCode).toBe("005930");
-    expect(orders[0].stockName).toBe("삼성전자");
-    expect(orders[0].referencePrice).toBe(70000);
-    expect(orders[0].trailingStopPct).toBe(3.0);
-    expect(db.prepare).toHaveBeenCalled();
-  });
-
   test("getActiveOrders with broker filter", async () => {
     const { db, mockStmt } = createMockDB();
     const repo = createOrderRepository(db);

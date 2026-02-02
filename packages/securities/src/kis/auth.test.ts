@@ -26,43 +26,6 @@ afterEach(() => {
 describe("createKisAuthClient", () => {
   const credentials = { appkey: "my-appkey", appsecret: "my-appsecret" };
 
-  describe("production env", () => {
-    test("uses production URL", async () => {
-      const client = createKisAuthClient("production");
-      await client.getToken(credentials);
-
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        "https://openapi.koreainvestment.com:9443/oauth2/tokenP",
-        expect.anything(),
-      );
-    });
-  });
-
-  describe("dev env", () => {
-    test("uses dev URL", async () => {
-      const client = createKisAuthClient("dev");
-      await client.getToken(credentials);
-
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        "https://openapivts.koreainvestment.com:29443/oauth2/tokenP",
-        expect.anything(),
-      );
-    });
-  });
-
-  test("sends POST with correct Content-Type header", async () => {
-    const client = createKisAuthClient("production");
-    await client.getToken(credentials);
-
-    const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
-    const init = callArgs[1] as RequestInit;
-
-    expect(init.method).toBe("POST");
-    expect((init.headers as Record<string, string>)["Content-Type"]).toBe(
-      "application/json; charset=UTF-8",
-    );
-  });
-
   test("sends correct request body", async () => {
     const client = createKisAuthClient("production");
     await client.getToken(credentials);

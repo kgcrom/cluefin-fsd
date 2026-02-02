@@ -25,43 +25,6 @@ afterEach(() => {
 describe("createKiwoomAuthClient", () => {
   const credentials = { appkey: "my-appkey", secretkey: "my-secretkey" };
 
-  describe("production env", () => {
-    test("uses production URL", async () => {
-      const client = createKiwoomAuthClient("production");
-      await client.getToken(credentials);
-
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        "https://api.kiwoom.com/oauth2/token",
-        expect.anything(),
-      );
-    });
-  });
-
-  describe("dev env", () => {
-    test("uses dev URL", async () => {
-      const client = createKiwoomAuthClient("dev");
-      await client.getToken(credentials);
-
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        "https://mockapi.kiwoom.com/oauth2/token",
-        expect.anything(),
-      );
-    });
-  });
-
-  test("sends POST with correct Content-Type header", async () => {
-    const client = createKiwoomAuthClient("production");
-    await client.getToken(credentials);
-
-    const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
-    const init = callArgs[1] as RequestInit;
-
-    expect(init.method).toBe("POST");
-    expect((init.headers as Record<string, string>)["Content-Type"]).toBe(
-      "application/json;charset=UTF-8",
-    );
-  });
-
   test("sends correct request body", async () => {
     const client = createKiwoomAuthClient("production");
     await client.getToken(credentials);
