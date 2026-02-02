@@ -23,7 +23,7 @@ function getKstMinute(): number {
   return kstMinutes % 60;
 }
 
-function isOrderExecutionTime(): boolean {
+export function isOrderExecutionTime(): boolean {
   const hour = getKstHour();
   const minute = getKstMinute();
   const totalMinutes = hour * 60 + minute;
@@ -31,7 +31,7 @@ function isOrderExecutionTime(): boolean {
   return totalMinutes >= 9 * 60 + 10 && totalMinutes <= 15 * 60;
 }
 
-function isFillCheckTime(): boolean {
+export function isFillCheckTime(): boolean {
   const hour = getKstHour();
   // KST 16:00 ~ 17:59
   return hour >= 16 && hour <= 17;
@@ -94,7 +94,7 @@ async function executeKiwoomOrder(
   };
 }
 
-async function handleOrderExecution(env: Env): Promise<void> {
+export async function handleOrderExecution(env: Env): Promise<void> {
   const repo = createOrderRepository(env.cluefin_fsd_db);
   const orders = await repo.getActiveOrders();
 
