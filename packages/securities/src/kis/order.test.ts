@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-import { createKisTradingClient } from "./trading";
+import { createKisOrderClient } from "./order";
 import type { KisOrderParams } from "./types";
 
 const originalFetch = globalThis.fetch;
@@ -36,13 +36,13 @@ const params: KisOrderParams = {
   price: "66000",
 };
 
-describe("createKisTradingClient", () => {
+describe("createKisOrderClient", () => {
   test("throws on HTTP error", async () => {
     globalThis.fetch = mock(() =>
       Promise.resolve(new Response("Forbidden", { status: 403, statusText: "Forbidden" })),
     );
 
-    const client = createKisTradingClient("production");
+    const client = createKisOrderClient("production");
 
     expect(client.buyOrder(credentials, token, params)).rejects.toThrow(
       "KIS order request failed: 403 Forbidden",

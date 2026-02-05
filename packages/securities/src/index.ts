@@ -1,7 +1,7 @@
 export {
   createKisAuthClient,
   createKisMarketClient,
-  createKisTradingClient,
+  createKisOrderClient,
   type KisCredentials,
   type KisIntradayChartOutput1,
   type KisIntradayChartOutput2,

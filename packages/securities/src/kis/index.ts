@@ -1,6 +1,6 @@
 export { createKisAuthClient } from "./auth";
 export { createKisMarketClient } from "./market";
-export { createKisTradingClient } from "./trading";
+export { createKisOrderClient } from "./order";
 export type {
   KisCredentials,
   KisIntradayChartOutput1,

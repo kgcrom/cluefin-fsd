@@ -7,16 +7,16 @@ const BASE_URLS: Record<BrokerEnv, string> = {
 };
 
 const BUY_TR_IDS: Record<BrokerEnv, string> = {
-  production: "TTTC0802U",
-  dev: "VTTC0802U",
+  production: "TTTC0012U",
+  dev: "VTTC0012U",
 };
 
 const SELL_TR_IDS: Record<BrokerEnv, string> = {
-  production: "TTTC0801U",
-  dev: "VTTC0801U",
+  production: "TTTC0011U",
+  dev: "VTTC0011U",
 };
 
-interface KisTradingClient {
+interface KisOrderClient {
   buyOrder(
     credentials: KisCredentials,
     token: string,
@@ -57,6 +57,25 @@ async function placeOrder(
   params: KisOrderParams,
   trId: string,
 ): Promise<KisOrderResponse> {
+  const body: Record<string, string> = {
+    CANO: params.accountNo,
+    ACNT_PRDT_CD: params.accountProductCode,
+    PDNO: params.stockCode,
+    ORD_DVSN: params.orderType,
+    ORD_QTY: params.quantity,
+    ORD_UNPR: params.price,
+  };
+
+  if (params.sllType) {
+    body.SLL_TYPE = params.sllType;
+  }
+  if (params.cndtPric) {
+    body.CNDT_PRIC = params.cndtPric;
+  }
+  if (params.excgIdDvsnCd) {
+    body.EXCG_ID_DVSN_CD = params.excgIdDvsnCd;
+  }
+
   const response = await fetch(`${baseUrl}/uapi/domestic-stock/v1/trading/order-cash`, {
     method: "POST",
     headers: {
@@ -67,14 +86,7 @@ async function placeOrder(
       tr_id: trId,
       custtype: "P",
     },
-    body: JSON.stringify({
-      CANO: params.accountNo,
-      ACNT_PRDT_CD: params.accountProductCode,
-      PDNO: params.stockCode,
-      ORD_DVSN: params.orderType,
-      ORD_QTY: params.quantity,
-      ORD_UNPR: params.price,
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {
@@ -94,7 +106,7 @@ async function placeOrder(
   };
 }
 
-export function createKisTradingClient(env: BrokerEnv): KisTradingClient {
+export function createKisOrderClient(env: BrokerEnv): KisOrderClient {
   const baseUrl = BASE_URLS[env];
 
   return {

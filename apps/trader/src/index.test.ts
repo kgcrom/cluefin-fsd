@@ -15,7 +15,7 @@ mock.module("@cluefin/cloudflare", () => ({
 
 mock.module("@cluefin/securities", () => ({
   createKisMarketClient: () => ({}),
-  createKisTradingClient: () => ({
+  createKisOrderClient: () => ({
     buyOrder: mockBuyOrder,
     sellOrder: mockSellOrder,
   }),

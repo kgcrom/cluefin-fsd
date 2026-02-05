@@ -3,7 +3,7 @@ import { createOrderRepository } from "@cluefin/cloudflare";
 import {
   type BrokerEnv,
   createKisMarketClient,
-  createKisTradingClient,
+  createKisOrderClient,
   createKiwoomMarketClient,
   createKiwoomOrderClient,
   type KisIntradayChartParams,
@@ -172,7 +172,7 @@ app.post("/kis/order", async (c) => {
   }
 
   try {
-    const client = createKisTradingClient(env);
+    const client = createKisOrderClient(env);
     const result =
       body.side === "buy"
         ? await client.buyOrder(credentials, token, orderParams)

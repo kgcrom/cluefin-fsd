@@ -68,6 +68,12 @@ export interface KisOrderParams {
   quantity: string;
   /** 주문단가 (시장가 등은 "0") */
   price: string;
+  /** 매도유형 (매도주문 시): 01@일반매도, 02@임의매매, 05@대차매도 */
+  sllType?: string;
+  /** 조건가격 (스탑지정가 주문시, ORD_DVSN=22) */
+  cndtPric?: string;
+  /** 거래소ID구분코드: KRX, NXT, SOR */
+  excgIdDvsnCd?: string;
 }
 
 export interface KisOrderOutput {

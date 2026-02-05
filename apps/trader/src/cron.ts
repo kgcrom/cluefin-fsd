@@ -1,10 +1,6 @@
 import type { TradeOrder } from "@cluefin/cloudflare";
 import { createOrderRepository } from "@cluefin/cloudflare";
-import {
-  type BrokerEnv,
-  createKisTradingClient,
-  createKiwoomOrderClient,
-} from "@cluefin/securities";
+import { type BrokerEnv, createKisOrderClient, createKiwoomOrderClient } from "@cluefin/securities";
 import type { Env } from "./bindings";
 import { isFillCheckTime, isOrderExecutionTime } from "./time-utils";
 
@@ -15,7 +11,7 @@ async function executeKisOrder(
 ): Promise<{ brokerOrderId: string; brokerResponse: string }> {
   const kisEnv = env.KIS_ENV as BrokerEnv;
   const credentials = { appkey: env.KIS_APP_KEY, appsecret: env.KIS_SECRET_KEY };
-  const client = createKisTradingClient(kisEnv);
+  const client = createKisOrderClient(kisEnv);
 
   const params = {
     accountNo: env.KIS_ACCOUNT_NO,
