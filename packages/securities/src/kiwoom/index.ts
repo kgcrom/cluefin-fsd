@@ -8,6 +8,8 @@ export type {
   KiwoomRankItem,
   KiwoomRankParams,
   KiwoomRankResponse,
+  KiwoomSellOrderParams,
+  KiwoomSellOrderResponse,
   KiwoomTokenResponse,
   KiwoomVolumeSurgeItem,
   KiwoomVolumeSurgeParams,
