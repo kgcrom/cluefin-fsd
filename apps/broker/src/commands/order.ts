@@ -1,5 +1,5 @@
 import { parseArgs } from "node:util";
-import { WRANGLER_CONFIG } from "../utils";
+import { escapeSQL, WRANGLER_CONFIG } from "../utils";
 
 const DB_NAME = "cluefin-fsd-db";
 
@@ -77,10 +77,6 @@ async function execD1(sql: string): Promise<string> {
   }
 
   return stdout;
-}
-
-function escapeSQL(value: string): string {
-  return value.replace(/'/g, "''");
 }
 
 async function addOrder(args: string[]): Promise<void> {

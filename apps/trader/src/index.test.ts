@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { beforeEach, describe, expect, mock, test } from "bun:test";
 
 const mockGetActiveOrders = mock(() => Promise.resolve([]));
 const mockGetOrderById = mock(() => Promise.resolve(null));

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, mock, setSystemTime, test } from "bun:test";
+import { afterEach, describe, expect, mock, test } from "bun:test";
 
 const mockGetActiveOrders = mock(() => Promise.resolve([]));
 const mockGetRequestedQuantity = mock(() => Promise.resolve(0));
@@ -26,7 +26,7 @@ mock.module("@cluefin/securities", () => ({
   }),
 }));
 
-const { isOrderExecutionTime, isFillCheckTime, handleOrderExecution } = await import("./cron");
+const { handleOrderExecution } = await import("./cron");
 
 const mockEnv = {
   KIS_APP_KEY: "test-key",
@@ -42,48 +42,13 @@ const mockEnv = {
   cluefin_fsd_db: {},
 };
 
-/** KST = UTC + 9h. 주어진 KST 시각에 해당하는 UTC Date를 만든다. */
-function kstDate(hour: number, minute: number): Date {
-  return new Date(Date.UTC(2025, 0, 6, hour - 9, minute));
-}
-
 afterEach(() => {
-  setSystemTime();
   mockGetActiveOrders.mockClear();
   mockGetRequestedQuantity.mockClear();
   mockCreateExecution.mockClear();
   mockUpdateOrderStatus.mockClear();
   mockBuyOrder.mockClear();
   mockSellOrder.mockClear();
-});
-
-describe("isOrderExecutionTime", () => {
-  test("KST 09:10 → true (거래 시작 경계)", () => {
-    setSystemTime(kstDate(9, 10));
-    expect(isOrderExecutionTime()).toBe(true);
-  });
-
-  test("KST 09:09 → false (거래 시작 전)", () => {
-    setSystemTime(kstDate(9, 9));
-    expect(isOrderExecutionTime()).toBe(false);
-  });
-
-  test("KST 15:01 → false (거래 종료 후)", () => {
-    setSystemTime(kstDate(15, 1));
-    expect(isOrderExecutionTime()).toBe(false);
-  });
-});
-
-describe("isFillCheckTime", () => {
-  test("KST 16:00 → true (체결 확인 시간)", () => {
-    setSystemTime(kstDate(16, 0));
-    expect(isFillCheckTime()).toBe(true);
-  });
-
-  test("KST 15:59 → false (체결 확인 시간 전)", () => {
-    setSystemTime(kstDate(15, 59));
-    expect(isFillCheckTime()).toBe(false);
-  });
 });
 
 describe("handleOrderExecution", () => {

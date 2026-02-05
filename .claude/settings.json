@@ -1,6 +1,7 @@
 {
   "enabledPlugins": {
-    "playground@claude-plugins-official": true
+    "playground@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true
   },
   "hooks": {
     "Stop": [

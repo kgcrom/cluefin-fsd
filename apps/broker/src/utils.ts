@@ -23,3 +23,7 @@ export function parseBrokerEnv(raw: string): BrokerEnv {
       throw new Error(`잘못된 환경값: "${raw}". "prod" 또는 "dev"를 사용하세요.`);
   }
 }
+
+export function escapeSQL(value: string): string {
+  return value.replace(/'/g, "''");
+}

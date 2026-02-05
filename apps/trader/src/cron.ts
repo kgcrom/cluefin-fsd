@@ -6,36 +6,7 @@ import {
   createKiwoomOrderClient,
 } from "@cluefin/securities";
 import type { Env } from "./bindings";
-
-function getKstHour(): number {
-  const now = new Date();
-  const kstOffset = 9 * 60;
-  const utcMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
-  const kstMinutes = utcMinutes + kstOffset;
-  return Math.floor(kstMinutes / 60) % 24;
-}
-
-function getKstMinute(): number {
-  const now = new Date();
-  const kstOffset = 9 * 60;
-  const utcMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
-  const kstMinutes = utcMinutes + kstOffset;
-  return kstMinutes % 60;
-}
-
-export function isOrderExecutionTime(): boolean {
-  const hour = getKstHour();
-  const minute = getKstMinute();
-  const totalMinutes = hour * 60 + minute;
-  // KST 09:10 ~ 15:00
-  return totalMinutes >= 9 * 60 + 10 && totalMinutes <= 15 * 60;
-}
-
-export function isFillCheckTime(): boolean {
-  const hour = getKstHour();
-  // KST 16:00 ~ 17:59
-  return hour >= 16 && hour <= 17;
-}
+import { isFillCheckTime, isOrderExecutionTime } from "./time-utils";
 
 async function executeKisOrder(
   env: Env,
