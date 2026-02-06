@@ -1,7 +1,7 @@
 {
-  "enabledPlugins": {
-    "playground@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true
+  "enabledPlugins": {},
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "hooks": {
     "Stop": [

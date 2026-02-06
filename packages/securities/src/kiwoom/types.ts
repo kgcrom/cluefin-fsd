@@ -101,3 +101,41 @@ export interface KiwoomSellOrderResponse {
   ordNo: string;
   dmstStexTp: string;
 }
+
+export interface KiwoomDailyOrderParams {
+  stkCd?: string;
+  qryTp: "0" | "1";
+  sellTp: "0" | "1" | "2";
+  ordNo?: string;
+  stexTp: "0" | "1" | "2";
+  contYn?: string;
+  nextKey?: string;
+}
+
+export interface KiwoomDailyOrderItem {
+  ordNo: string;
+  stkNm: string;
+  ioTpNm: string;
+  ordPric: string;
+  ordQty: string;
+  cntrPric: string;
+  cntrQty: string;
+  osoQty: string;
+  tdyTrdeCmsn: string;
+  tdyTrdeTax: string;
+  ordStt: string;
+  trdeTp: string;
+  origOrdNo: string;
+  ordTm: string;
+  stkCd: string;
+  stexTp: string;
+  stexTpTxt: string;
+  sorYn: string;
+  stopPric: string;
+}
+
+export interface KiwoomDailyOrderResponse {
+  cntr: KiwoomDailyOrderItem[];
+  contYn?: string;
+  nextKey?: string;
+}
