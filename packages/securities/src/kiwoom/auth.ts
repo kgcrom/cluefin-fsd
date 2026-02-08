@@ -34,6 +34,12 @@ export function createKiwoomAuthClient(env: BrokerEnv): AuthClient<KiwoomCredent
 
       const data: KiwoomTokenResponse = await response.json();
 
+      if (data.return_code !== 0) {
+        throw new Error(
+          `Kiwoom token request failed: code: ${data.return_code}, msg: ${data.return_msg}`,
+        );
+      }
+
       return {
         token: data.token,
         tokenType: data.token_type,

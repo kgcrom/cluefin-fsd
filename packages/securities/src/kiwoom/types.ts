@@ -13,6 +13,8 @@ export interface KiwoomTokenResponse {
   expires_dt: string;
   token_type: string;
   token: string;
+  return_code: number;
+  return_msg: string;
 }
 
 export interface KiwoomRankParams {
