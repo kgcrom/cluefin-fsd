@@ -1,3 +1,4 @@
+import type { ScheduledEvent } from "@cloudflare/workers-types";
 import type { ExecutionStatus, TradeExecution, TradeOrder } from "@cluefin/cloudflare";
 import { createOrderRepository } from "@cluefin/cloudflare";
 import {

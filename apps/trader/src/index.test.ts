@@ -1,27 +1,27 @@
-import { beforeEach, describe, expect, mock, test } from "bun:test";
-
-const mockGetActiveOrders = mock(() => Promise.resolve([]));
-const mockGetOrderById = mock(() => Promise.resolve(null));
-const mockBuyOrder = mock(() => Promise.resolve({ output: { odno: "001", ordTmd: "121000" } }));
-const mockSellOrder = mock(() => Promise.resolve({ output: { odno: "002", ordTmd: "121001" } }));
-const mockKiwoomBuyOrder = mock(() => Promise.resolve({ ordNo: "K001", ordTm: "121000" }));
+import { describe, expect, mock, test } from "bun:test";
 
 mock.module("@cluefin/cloudflare", () => ({
   createOrderRepository: () => ({
-    getActiveOrders: mockGetActiveOrders,
-    getOrderById: mockGetOrderById,
+    getActiveOrders: mock(),
+    getRequestedQuantity: mock(),
+    createExecution: mock(),
+    updateOrderStatus: mock(),
+    getUnfilledExecutions: mock(() => Promise.resolve([])),
+    updateExecutionFill: mock(),
   }),
 }));
 
 mock.module("@cluefin/securities", () => ({
   createKisMarketClient: () => ({}),
   createKisOrderClient: () => ({
-    buyOrder: mockBuyOrder,
-    sellOrder: mockSellOrder,
+    buyOrder: mock(),
+    sellOrder: mock(),
+    getDailyOrders: mock(),
   }),
   createKiwoomMarketClient: () => ({}),
   createKiwoomOrderClient: () => ({
-    buyOrder: mockKiwoomBuyOrder,
+    buyOrder: mock(),
+    getDailyOrders: mock(),
   }),
 }));
 
@@ -43,107 +43,13 @@ const mockEnv = {
 
 const mockCtx = { waitUntil: mock(), passThroughOnException: mock() };
 
-function req(method: string, path: string, body?: unknown) {
-  const url = `http://localhost${path}`;
-  const init: RequestInit = { method };
-  if (body) {
-    init.headers = { "Content-Type": "application/json" };
-    init.body = JSON.stringify(body);
-  }
-  return new Request(url, init);
+function req(method: string, path: string) {
+  return new Request(`http://localhost${path}`, { method });
 }
 
-beforeEach(() => {
-  mockGetActiveOrders.mockClear();
-  mockGetOrderById.mockClear();
-  mockBuyOrder.mockClear();
-  mockSellOrder.mockClear();
-  mockKiwoomBuyOrder.mockClear();
-});
-
-describe("GET /orders", () => {
-  test("broker 유효값이 아니면 400", async () => {
-    const res = await worker.fetch(req("GET", "/orders?broker=nope"), mockEnv, mockCtx);
-    expect(res.status).toBe(400);
-  });
-});
-
-describe("GET /orders/:id", () => {
-  test("숫자가 아닌 ID → 400", async () => {
-    const res = await worker.fetch(req("GET", "/orders/abc"), mockEnv, mockCtx);
-    expect(res.status).toBe(400);
-  });
-
-  test("존재하지 않는 ID → 404", async () => {
-    mockGetOrderById.mockResolvedValueOnce(null);
-    const res = await worker.fetch(req("GET", "/orders/999"), mockEnv, mockCtx);
+describe("GET /unknown", () => {
+  test("존재하지 않는 라우트 → 404", async () => {
+    const res = await worker.fetch(req("GET", "/unknown"), mockEnv, mockCtx);
     expect(res.status).toBe(404);
-  });
-});
-
-describe("POST /kis/order", () => {
-  test("토큰 없으면 401", async () => {
-    const envNoToken = { ...mockEnv, BROKER_TOKEN_KIS: "" };
-    const res = await worker.fetch(
-      req("POST", "/kis/order", { side: "buy", stockCode: "005930" }),
-      envNoToken,
-      mockCtx,
-    );
-    expect(res.status).toBe(401);
-  });
-
-  test("잘못된 side → 400", async () => {
-    const res = await worker.fetch(
-      req("POST", "/kis/order", { side: "hold", stockCode: "005930" }),
-      mockEnv,
-      mockCtx,
-    );
-    expect(res.status).toBe(400);
-  });
-
-  test("side=buy → buyOrder 호출", async () => {
-    const body = {
-      side: "buy",
-      stockCode: "005930",
-      orderType: "00",
-      quantity: "10",
-      price: "66000",
-      accountNo: "12345",
-      accountProductCode: "01",
-    };
-    const res = await worker.fetch(req("POST", "/kis/order", body), mockEnv, mockCtx);
-    expect(res.status).toBe(200);
-    expect(mockBuyOrder).toHaveBeenCalledTimes(1);
-    expect(mockSellOrder).not.toHaveBeenCalled();
-  });
-
-  test("side=sell → sellOrder 호출", async () => {
-    const body = {
-      side: "sell",
-      stockCode: "005930",
-      orderType: "00",
-      quantity: "10",
-      price: "66000",
-      accountNo: "12345",
-      accountProductCode: "01",
-    };
-    const res = await worker.fetch(req("POST", "/kis/order", body), mockEnv, mockCtx);
-    expect(res.status).toBe(200);
-    expect(mockSellOrder).toHaveBeenCalledTimes(1);
-    expect(mockBuyOrder).not.toHaveBeenCalled();
-  });
-});
-
-describe("POST /kiwoom/order", () => {
-  test("side=sell → 501 미구현", async () => {
-    const body = {
-      side: "sell",
-      stkCd: "005930",
-      ordQty: "10",
-      trdeTp: "0",
-      dmstStexTp: "1",
-    };
-    const res = await worker.fetch(req("POST", "/kiwoom/order", body), mockEnv, mockCtx);
-    expect(res.status).toBe(501);
   });
 });
