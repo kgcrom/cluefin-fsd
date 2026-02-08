@@ -81,13 +81,26 @@ export async function handleOrderExecution(env: Env): Promise<void> {
         continue;
       }
 
+      let quantity: number;
+      if (order.side === "buy") {
+        const maxQty = Math.floor(200000 / order.referencePrice);
+        quantity = Math.min(remaining, maxQty);
+      } else {
+        quantity = remaining === 1 ? 1 : Math.floor(remaining / 2);
+      }
+
+      // 한주당 20만원이 넘는 주식을 매수하는 경우 발생
+      if (quantity <= 0) {
+        continue;
+      }
+
       const executeOrder = order.broker === "kis" ? executeKisOrder : executeKiwoomOrder;
-      const { brokerOrderId, brokerResponse } = await executeOrder(env, order, remaining);
+      const { brokerOrderId, brokerResponse } = await executeOrder(env, order, quantity);
 
       await repo.createExecution({
         orderId: order.id,
         brokerOrderId,
-        requestedQty: remaining,
+        requestedQty: quantity,
         requestedPrice: order.referencePrice,
         broker: order.broker,
         brokerResponse,
