@@ -10,6 +10,9 @@ Commands:
   list      주문 목록 조회
   cancel    주문 취소
 
+공통 옵션:
+  --remote          원격 D1 데이터베이스 사용 (기본: local)
+
 각 명령의 상세 옵션은 --help 플래그로 확인:
   broker order add --help`;
 
@@ -61,11 +64,21 @@ const CANCEL_HELP = `Usage: broker order cancel <id>
 예시:
   broker order cancel 3`;
 
-async function execD1(sql: string): Promise<string> {
-  const proc = Bun.spawn(
-    ["bunx", "wrangler", "d1", "execute", DB_NAME, "--command", sql, "--config", WRANGLER_CONFIG],
-    { stdout: "pipe", stderr: "pipe" },
-  );
+async function execD1(sql: string, remote: boolean): Promise<string> {
+  const args = [
+    "bunx",
+    "wrangler",
+    "d1",
+    "execute",
+    DB_NAME,
+    "--command",
+    sql,
+    "--config",
+    WRANGLER_CONFIG,
+  ];
+  if (remote) args.push("--remote");
+
+  const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });
 
   const exitCode = await proc.exited;
   const stdout = await new Response(proc.stdout).text();
@@ -79,7 +92,7 @@ async function execD1(sql: string): Promise<string> {
   return stdout;
 }
 
-async function addOrder(args: string[]): Promise<void> {
+async function addOrder(args: string[], remote: boolean): Promise<void> {
   const { values } = parseArgs({
     args,
     options: {
@@ -158,12 +171,12 @@ async function addOrder(args: string[]): Promise<void> {
   }
 
   const sql = `INSERT INTO trade_orders (${columns.join(", ")}) VALUES (${vals.join(", ")})`;
-  const output = await execD1(sql);
+  const output = await execD1(sql, remote);
   console.log("주문 추가 완료");
   if (output.trim()) console.log(output);
 }
 
-async function listOrders(args: string[]): Promise<void> {
+async function listOrders(args: string[], remote: boolean): Promise<void> {
   const { values } = parseArgs({
     args,
     options: {
@@ -194,11 +207,11 @@ async function listOrders(args: string[]): Promise<void> {
   }
   sql += " ORDER BY created_at DESC";
 
-  const output = await execD1(sql);
+  const output = await execD1(sql, remote);
   console.log(output);
 }
 
-async function cancelOrder(args: string[]): Promise<void> {
+async function cancelOrder(args: string[], remote: boolean): Promise<void> {
   if (args.includes("--help") || args.includes("-h")) {
     console.log(CANCEL_HELP);
     process.exit(0);
@@ -211,14 +224,18 @@ async function cancelOrder(args: string[]): Promise<void> {
   }
 
   const sql = `UPDATE trade_orders SET status = 'cancelled', updated_at = datetime('now') WHERE id = ${Number(id)}`;
-  const output = await execD1(sql);
+  const output = await execD1(sql, remote);
   console.log(`주문 #${id} 취소 완료`);
   if (output.trim()) console.log(output);
 }
 
 export async function runOrder(args: string[]): Promise<void> {
-  const subcommand = args[0];
-  const rest = args.slice(1);
+  const remoteIdx = args.indexOf("--remote");
+  const remote = remoteIdx !== -1;
+  const filtered = remote ? [...args.slice(0, remoteIdx), ...args.slice(remoteIdx + 1)] : args;
+
+  const subcommand = filtered[0];
+  const rest = filtered.slice(1);
 
   if (!subcommand || subcommand === "--help" || subcommand === "-h") {
     console.log(ORDER_HELP);
@@ -227,11 +244,11 @@ export async function runOrder(args: string[]): Promise<void> {
 
   switch (subcommand) {
     case "add":
-      return addOrder(rest);
+      return addOrder(rest, remote);
     case "list":
-      return listOrders(rest);
+      return listOrders(rest, remote);
     case "cancel":
-      return cancelOrder(rest);
+      return cancelOrder(rest, remote);
     default:
       console.error(ORDER_HELP);
       process.exit(1);

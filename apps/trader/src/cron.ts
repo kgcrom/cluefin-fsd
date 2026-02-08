@@ -74,6 +74,9 @@ export async function handleOrderExecution(env: Env): Promise<void> {
 
   for (const order of orders) {
     try {
+      // TODO: 매수 조건식 — 현재가 조회 후 reference_price 대비 조건 충족 여부 판단
+      // TODO: 매도 조건식 — 보유 종목의 수익률/손실률 기반 매도 시점 판단
+
       const requestedQty = await repo.getRequestedQuantity(order.id);
       const remaining = order.quantity - requestedQty;
 
@@ -105,6 +108,9 @@ export async function handleOrderExecution(env: Env): Promise<void> {
         broker: order.broker,
         brokerResponse,
       });
+
+      // TODO: trailing stop — 체결 후 고점 대비 trailing_stop_pct 이상 하락 시 매도 주문 생성
+      // TODO: loss cut — 매수 평균가 대비 일정 비율 이하 하락 시 즉시 매도 주문 생성
 
       if (order.status === "pending") {
         await repo.updateOrderStatus(order.id, "monitoring");
