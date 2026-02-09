@@ -55,6 +55,7 @@ async function saveSecret(key: string, value: string): Promise<void> {
   await upsertDevVar(key, value);
 }
 
+// TODO: broker에서 토큰 발급하는게 아니라 cloudflare cron으로 실행
 export async function runToken(broker: string): Promise<void> {
   if (!["kis", "kiwoom"].includes(broker)) {
     console.error("Usage: bun run src/index.ts token <kis|kiwoom>");
@@ -87,6 +88,8 @@ export async function runToken(broker: string): Promise<void> {
   if (broker === "kis") {
     await saveSecret("KIS_APP_KEY", requireEnv("KIS_APP_KEY"));
     await saveSecret("KIS_SECRET_KEY", requireEnv("KIS_SECRET_KEY"));
+    await saveSecret("KIS_ACCOUNT_NO", requireEnv("KIS_ACCOUNT_NO"));
+    await saveSecret("KIS_ACCOUNT_PRODUCT_CODE", requireEnv("KIS_ACCOUNT_PRODUCT_CODE"));
   } else {
     await saveSecret("KIWOOM_APP_KEY", requireEnv("KIWOOM_APP_KEY"));
     await saveSecret("KIWOOM_SECRET_KEY", requireEnv("KIWOOM_SECRET_KEY"));
