@@ -258,6 +258,11 @@ export async function handleFillCheck(env: Env): Promise<void> {
 
   console.log(`[cron] 체결 확인: ${executions.length}개 미체결 주문`);
 
+  if (executions.length === 0) {
+    console.log("[cron] 체결 확인 완료: 미체결 주문 없음, 스킵");
+    return;
+  }
+
   // Group by broker
   const kisList = executions.filter((e) => e.broker === "kis");
   const kiwoomList = executions.filter((e) => e.broker === "kiwoom");
