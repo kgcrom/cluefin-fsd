@@ -29,7 +29,7 @@ const params: KiwoomBuyOrderParams = {
 
 describe("createKiwoomOrderClient", () => {
   test("includes ord_uv in body when provided", async () => {
-    const client = createKiwoomOrderClient("production");
+    const client = createKiwoomOrderClient("prod");
     await client.buyOrder(token, { ...params, ordUv: "72000" });
 
     const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
@@ -40,7 +40,7 @@ describe("createKiwoomOrderClient", () => {
   });
 
   test("includes cond_uv in body when provided", async () => {
-    const client = createKiwoomOrderClient("production");
+    const client = createKiwoomOrderClient("prod");
     await client.buyOrder(token, { ...params, condUv: "71000" });
 
     const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
@@ -51,7 +51,7 @@ describe("createKiwoomOrderClient", () => {
   });
 
   test("omits optional fields from body when not provided", async () => {
-    const client = createKiwoomOrderClient("production");
+    const client = createKiwoomOrderClient("prod");
     await client.buyOrder(token, params);
 
     const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
@@ -67,7 +67,7 @@ describe("createKiwoomOrderClient", () => {
       Promise.resolve(new Response("Forbidden", { status: 403, statusText: "Forbidden" })),
     );
 
-    const client = createKiwoomOrderClient("production");
+    const client = createKiwoomOrderClient("prod");
 
     expect(client.buyOrder(token, params)).rejects.toThrow(
       "Kiwoom buy order request failed: 403 Forbidden",
@@ -79,7 +79,7 @@ describe("createKiwoomOrderClient", () => {
       Promise.resolve(new Response(JSON.stringify({}), { status: 200 })),
     );
 
-    const client = createKiwoomOrderClient("production");
+    const client = createKiwoomOrderClient("prod");
     const result = await client.buyOrder(token, params);
 
     expect(result).toEqual({
@@ -127,7 +127,7 @@ describe("getDailyOrders", () => {
       Promise.resolve(new Response(JSON.stringify(rawDailyOrderResponse), { status: 200 })),
     );
 
-    const client = createKiwoomOrderClient("production");
+    const client = createKiwoomOrderClient("prod");
     await client.getDailyOrders(token, dailyOrderParams);
 
     const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
@@ -148,7 +148,7 @@ describe("getDailyOrders", () => {
       Promise.resolve(new Response(JSON.stringify(rawDailyOrderResponse), { status: 200 })),
     );
 
-    const client = createKiwoomOrderClient("production");
+    const client = createKiwoomOrderClient("prod");
     await client.getDailyOrders(token, {
       ...dailyOrderParams,
       stkCd: "005930",
@@ -168,7 +168,7 @@ describe("getDailyOrders", () => {
       Promise.resolve(new Response(JSON.stringify(rawDailyOrderResponse), { status: 200 })),
     );
 
-    const client = createKiwoomOrderClient("production");
+    const client = createKiwoomOrderClient("prod");
     await client.getDailyOrders(token, {
       ...dailyOrderParams,
       contYn: "Y",
@@ -188,7 +188,7 @@ describe("getDailyOrders", () => {
       Promise.resolve(new Response(JSON.stringify(rawDailyOrderResponse), { status: 200 })),
     );
 
-    const client = createKiwoomOrderClient("production");
+    const client = createKiwoomOrderClient("prod");
     const result = await client.getDailyOrders(token, dailyOrderParams);
 
     expect(result.cntr).toHaveLength(1);
@@ -226,7 +226,7 @@ describe("getDailyOrders", () => {
       ),
     );
 
-    const client = createKiwoomOrderClient("production");
+    const client = createKiwoomOrderClient("prod");
     const result = await client.getDailyOrders(token, dailyOrderParams);
 
     expect(result.contYn).toBe("Y");
@@ -238,7 +238,7 @@ describe("getDailyOrders", () => {
       Promise.resolve(new Response("Forbidden", { status: 403, statusText: "Forbidden" })),
     );
 
-    const client = createKiwoomOrderClient("production");
+    const client = createKiwoomOrderClient("prod");
 
     expect(client.getDailyOrders(token, dailyOrderParams)).rejects.toThrow(
       "Kiwoom daily order query failed: 403 Forbidden",
@@ -250,7 +250,7 @@ describe("getDailyOrders", () => {
       Promise.resolve(new Response(JSON.stringify({}), { status: 200 })),
     );
 
-    const client = createKiwoomOrderClient("production");
+    const client = createKiwoomOrderClient("prod");
     const result = await client.getDailyOrders(token, dailyOrderParams);
 
     expect(result.cntr).toEqual([]);

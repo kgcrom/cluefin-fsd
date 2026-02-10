@@ -10,7 +10,7 @@ import type {
 } from "./types";
 
 const BASE_URLS: Record<BrokerEnv, string> = {
-  production: "https://api.kiwoom.com",
+  prod: "https://api.kiwoom.com",
   dev: "https://mockapi.kiwoom.com",
 };
 

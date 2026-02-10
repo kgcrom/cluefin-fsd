@@ -16,7 +16,7 @@ export function requireEnv(name: string): string {
 export function parseBrokerEnv(raw: string): BrokerEnv {
   switch (raw) {
     case "prod":
-      return "production";
+      return "prod";
     case "dev":
       return "dev";
     default:

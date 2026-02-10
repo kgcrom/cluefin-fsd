@@ -2,7 +2,7 @@ import type { AuthClient, AuthToken, BrokerEnv } from "../types";
 import type { KiwoomCredentials, KiwoomTokenRequest, KiwoomTokenResponse } from "./types";
 
 const BASE_URLS: Record<BrokerEnv, string> = {
-  production: "https://api.kiwoom.com",
+  prod: "https://api.kiwoom.com",
   dev: "https://mockapi.kiwoom.com",
 };
 

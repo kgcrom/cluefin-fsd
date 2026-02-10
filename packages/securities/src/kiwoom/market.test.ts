@@ -47,7 +47,7 @@ const params: KiwoomRankParams = {
 
 describe("createKiwoomMarketClient", () => {
   test("omits date from body when not provided", async () => {
-    const client = createKiwoomMarketClient("production");
+    const client = createKiwoomMarketClient("prod");
     await client.getRank(token, params);
 
     const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
@@ -68,7 +68,7 @@ describe("createKiwoomMarketClient", () => {
       Promise.resolve(new Response("Forbidden", { status: 403, statusText: "Forbidden" })),
     );
 
-    const client = createKiwoomMarketClient("production");
+    const client = createKiwoomMarketClient("prod");
 
     expect(client.getRank(token, params)).rejects.toThrow(
       "Kiwoom rank request failed: 403 Forbidden",
@@ -80,7 +80,7 @@ describe("createKiwoomMarketClient", () => {
       Promise.resolve(new Response(JSON.stringify({}), { status: 200 })),
     );
 
-    const client = createKiwoomMarketClient("production");
+    const client = createKiwoomMarketClient("prod");
     const result = await client.getRank(token, params);
 
     expect(result.frgOrgnTrdeUpper).toEqual([]);
@@ -120,7 +120,7 @@ describe("getVolumeSurge", () => {
       Promise.resolve(new Response(JSON.stringify(volumeSurgeRawResponse), { status: 200 })),
     );
 
-    const client = createKiwoomMarketClient("production");
+    const client = createKiwoomMarketClient("prod");
     await client.getVolumeSurge(token, volumeSurgeParams);
 
     const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
@@ -135,7 +135,7 @@ describe("getVolumeSurge", () => {
       Promise.resolve(new Response(JSON.stringify(volumeSurgeRawResponse), { status: 200 })),
     );
 
-    const client = createKiwoomMarketClient("production");
+    const client = createKiwoomMarketClient("prod");
     await client.getVolumeSurge(token, { ...volumeSurgeParams, tm: "10" });
 
     const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
@@ -150,7 +150,7 @@ describe("getVolumeSurge", () => {
       Promise.resolve(new Response("Forbidden", { status: 403, statusText: "Forbidden" })),
     );
 
-    const client = createKiwoomMarketClient("production");
+    const client = createKiwoomMarketClient("prod");
 
     expect(client.getVolumeSurge(token, volumeSurgeParams)).rejects.toThrow(
       "Kiwoom volume surge request failed: 403 Forbidden",
@@ -162,7 +162,7 @@ describe("getVolumeSurge", () => {
       Promise.resolve(new Response(JSON.stringify({}), { status: 200 })),
     );
 
-    const client = createKiwoomMarketClient("production");
+    const client = createKiwoomMarketClient("prod");
     const result = await client.getVolumeSurge(token, volumeSurgeParams);
 
     expect(result.trdeQtySdnin).toEqual([]);

@@ -2,7 +2,7 @@ import type { AuthClient, AuthToken, BrokerEnv } from "../types";
 import type { KisCredentials, KisTokenRequest, KisTokenResponse } from "./types";
 
 const BASE_URLS: Record<BrokerEnv, string> = {
-  production: "https://openapi.koreainvestment.com:9443",
+  prod: "https://openapi.koreainvestment.com:9443",
   dev: "https://openapivts.koreainvestment.com:29443",
 };
 

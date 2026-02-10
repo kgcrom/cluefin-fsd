@@ -1,4 +1,4 @@
-export type BrokerEnv = "production" | "dev";
+export type BrokerEnv = "prod" | "dev";
 
 export interface AuthToken {
   token: string;

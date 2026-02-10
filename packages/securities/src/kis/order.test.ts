@@ -42,7 +42,7 @@ describe("createKisOrderClient", () => {
       Promise.resolve(new Response("Forbidden", { status: 403, statusText: "Forbidden" })),
     );
 
-    const client = createKisOrderClient("production");
+    const client = createKisOrderClient("prod");
 
     expect(client.buyOrder(credentials, token, params)).rejects.toThrow(
       "KIS order request failed: 403 Forbidden",
@@ -112,7 +112,7 @@ describe("getDailyOrders", () => {
       Promise.resolve(new Response(JSON.stringify(rawDailyOrderResponse), { status: 200 })),
     );
 
-    const client = createKisOrderClient("production");
+    const client = createKisOrderClient("prod");
     const result = await client.getDailyOrders(credentials, token, dailyOrderParams);
 
     expect(result.rtCd).toBe("0");
@@ -150,7 +150,7 @@ describe("getDailyOrders", () => {
       Promise.resolve(new Response(JSON.stringify(rawDailyOrderResponse), { status: 200 })),
     );
 
-    const client = createKisOrderClient("production");
+    const client = createKisOrderClient("prod");
     await client.getDailyOrders(credentials, token, dailyOrderParams, false);
 
     const fetchCall = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
@@ -164,7 +164,7 @@ describe("getDailyOrders", () => {
       Promise.resolve(new Response("Forbidden", { status: 403, statusText: "Forbidden" })),
     );
 
-    const client = createKisOrderClient("production");
+    const client = createKisOrderClient("prod");
 
     expect(client.getDailyOrders(credentials, token, dailyOrderParams)).rejects.toThrow(
       "KIS daily order inquiry failed: 403 Forbidden",

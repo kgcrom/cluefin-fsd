@@ -2,8 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { escapeSQL, parseBrokerEnv, requireEnv } from "./utils";
 
 describe("parseBrokerEnv", () => {
-  test('"prod" → "production"', () => {
-    expect(parseBrokerEnv("prod")).toBe("production");
+  test('"prod" → "prod"', () => {
+    expect(parseBrokerEnv("prod")).toBe("prod");
   });
 
   test('"dev" → "dev"', () => {

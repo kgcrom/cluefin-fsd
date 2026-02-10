@@ -27,7 +27,7 @@ describe("createKisAuthClient", () => {
   const credentials = { appkey: "my-appkey", appsecret: "my-appsecret" };
 
   test("sends correct request body", async () => {
-    const client = createKisAuthClient("production");
+    const client = createKisAuthClient("prod");
     await client.getToken(credentials);
 
     const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
@@ -42,7 +42,7 @@ describe("createKisAuthClient", () => {
   });
 
   test("parses response into AuthToken", async () => {
-    const client = createKisAuthClient("production");
+    const client = createKisAuthClient("prod");
     const token = await client.getToken(credentials);
 
     expect(token.token).toBe("test-token-abc");
@@ -51,7 +51,7 @@ describe("createKisAuthClient", () => {
   });
 
   test("parses KST datetime correctly", async () => {
-    const client = createKisAuthClient("production");
+    const client = createKisAuthClient("prod");
     const token = await client.getToken(credentials);
 
     const expected = new Date("2025-12-31T23:59:59+09:00");
@@ -63,7 +63,7 @@ describe("createKisAuthClient", () => {
       Promise.resolve(new Response(null, { status: 401, statusText: "Unauthorized" })),
     );
 
-    const client = createKisAuthClient("production");
+    const client = createKisAuthClient("prod");
 
     expect(client.getToken(credentials)).rejects.toThrow(
       "KIS token request failed: 401 Unauthorized",

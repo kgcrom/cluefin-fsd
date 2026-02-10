@@ -26,7 +26,7 @@ describe("createKiwoomAuthClient", () => {
   const credentials = { appkey: "my-appkey", secretkey: "my-secretkey" };
 
   test("sends correct request body", async () => {
-    const client = createKiwoomAuthClient("production");
+    const client = createKiwoomAuthClient("prod");
     await client.getToken(credentials);
 
     const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
@@ -41,7 +41,7 @@ describe("createKiwoomAuthClient", () => {
   });
 
   test("parses response into AuthToken", async () => {
-    const client = createKiwoomAuthClient("production");
+    const client = createKiwoomAuthClient("prod");
     const token = await client.getToken(credentials);
 
     expect(token.token).toBe("kiwoom-token-xyz");
@@ -50,7 +50,7 @@ describe("createKiwoomAuthClient", () => {
   });
 
   test("parses KST datetime correctly", async () => {
-    const client = createKiwoomAuthClient("production");
+    const client = createKiwoomAuthClient("prod");
     const token = await client.getToken(credentials);
 
     const expected = new Date("2025-12-31T23:59:59+09:00");
@@ -62,7 +62,7 @@ describe("createKiwoomAuthClient", () => {
       Promise.resolve(new Response(null, { status: 403, statusText: "Forbidden" })),
     );
 
-    const client = createKiwoomAuthClient("production");
+    const client = createKiwoomAuthClient("prod");
 
     expect(client.getToken(credentials)).rejects.toThrow(
       "Kiwoom token request failed: 403 Forbidden",

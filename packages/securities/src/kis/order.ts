@@ -11,22 +11,22 @@ import type {
 } from "./types";
 
 const BASE_URLS: Record<BrokerEnv, string> = {
-  production: "https://openapi.koreainvestment.com:9443",
+  prod: "https://openapi.koreainvestment.com:9443",
   dev: "https://openapivts.koreainvestment.com:29443",
 };
 
 const BUY_TR_IDS: Record<BrokerEnv, string> = {
-  production: "TTTC0012U",
+  prod: "TTTC0012U",
   dev: "VTTC0012U",
 };
 
 const SELL_TR_IDS: Record<BrokerEnv, string> = {
-  production: "TTTC0011U",
+  prod: "TTTC0011U",
   dev: "VTTC0011U",
 };
 
 const DAILY_ORDER_TR_IDS: Record<BrokerEnv, { recent: string; old: string }> = {
-  production: { recent: "TTTC0081R", old: "CTSC9215R" },
+  prod: { recent: "TTTC0081R", old: "CTSC9215R" },
   dev: { recent: "VTTC0081R", old: "VTSC9215R" },
 };
 

@@ -54,7 +54,7 @@ const params: KisIntradayChartParams = {
 
 describe("createKisMarketClient", () => {
   test("sends correct query parameters", async () => {
-    const client = createKisMarketClient("production");
+    const client = createKisMarketClient("prod");
     await client.getIntradayChart(credentials, token, params);
 
     const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
@@ -72,7 +72,7 @@ describe("createKisMarketClient", () => {
       Promise.resolve(new Response("Forbidden", { status: 403, statusText: "Forbidden" })),
     );
 
-    const client = createKisMarketClient("production");
+    const client = createKisMarketClient("prod");
 
     expect(client.getIntradayChart(credentials, token, params)).rejects.toThrow(
       "KIS intraday chart request failed: 403 Forbidden",

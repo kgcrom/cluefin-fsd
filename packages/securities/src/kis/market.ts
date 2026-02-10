@@ -8,7 +8,7 @@ import type {
 } from "./types";
 
 const BASE_URLS: Record<BrokerEnv, string> = {
-  production: "https://openapi.koreainvestment.com:9443",
+  prod: "https://openapi.koreainvestment.com:9443",
   dev: "https://openapivts.koreainvestment.com:29443",
 };
 
