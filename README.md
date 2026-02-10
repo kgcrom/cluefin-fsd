@@ -105,11 +105,3 @@ bun test
 # securities 패키지 테스트
 bun test packages/securities
 ```
-
-## Roadmap
-
-- [x] 증권사 인증 클라이언트 (KIS, Kiwoom)
-- [x] KIS 시세 조회 (인트라데이 차트)
-- [x] Kiwoom 시세 조회 (외국인/기관 순위, 거래량급증)
-- [~] 트레이딩 API 서비스 (trader — 일부 구현)
-- [~] 자동 매매 Cron (trader — 주문 실행 구현, 체결 조회 미구현)

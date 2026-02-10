@@ -98,7 +98,7 @@ Trader는 Cloudflare Workers Cron Triggers를 통해 자동 매매를 실행합�
 | KST 시간 | 동작 | 간격 |
 |-----------|------|------|
 | 09:10~15:00 (평일) | `trade_orders` 기반 주문 실행 | 5분 |
-| 16:00~17:59 (평일) | 체결 정보 갱신 (미구현) | 1분 |
+| 16:00~17:59 (평일) | 체결 정보 갱신 | 5분 |
 
 `broker CLI`의 `order add`로 등록된 주문(`trade_orders`)을 cron이 읽어 증권사에 주문을 보내고, 실행 내역을 `trade_executions` 테이블에 기록합니다.
 

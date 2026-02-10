@@ -18,6 +18,8 @@ broker CLI: `cd apps/broker && bun run start kis` (또는 `kiwoom`, `order`). �
 
 trader 로컬 개발: `cd apps/trader && bun run dev`
 
+trader 배포: `cd apps/trader && npx wrangler deploy`
+
 ## Architecture
 
 Bun 워크스페이스 모노레포. 패키지 간 의존은 `workspace:*` 프로토콜.
