@@ -14,6 +14,10 @@
       "database_id": "07fbb599-a7ed-48c7-890e-5533383a881c"
     }
   ],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1 // optional. default = 1.
+  },
   "triggers": {
     "crons": ["10,40 0,1,2,3,4,5 * * 1-5", "0 6 * * 1-5", "* 7-8 * * 1-5"]
   }
