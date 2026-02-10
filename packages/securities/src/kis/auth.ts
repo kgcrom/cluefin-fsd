@@ -8,6 +8,9 @@ const BASE_URLS: Record<BrokerEnv, string> = {
 
 export function createKisAuthClient(env: BrokerEnv): AuthClient<KisCredentials> {
   const baseUrl = BASE_URLS[env];
+  if (!baseUrl) {
+    throw new Error(`Invalid BrokerEnv: "${env}". Expected "prod" or "dev".`);
+  }
 
   return {
     async getToken(credentials: KisCredentials): Promise<AuthToken> {

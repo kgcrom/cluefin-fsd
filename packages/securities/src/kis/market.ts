@@ -78,6 +78,9 @@ function mapOutput2(raw: RawIntradayChartOutput2): KisIntradayChartOutput2 {
 
 export function createKisMarketClient(env: BrokerEnv): KisMarketClient {
   const baseUrl = BASE_URLS[env];
+  if (!baseUrl) {
+    throw new Error(`Invalid BrokerEnv: "${env}". Expected "prod" or "dev".`);
+  }
 
   return {
     async getIntradayChart(

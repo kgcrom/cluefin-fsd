@@ -99,6 +99,9 @@ function mapRankItem(raw: RawRankItem): KiwoomRankItem {
 
 export function createKiwoomMarketClient(env: BrokerEnv): KiwoomMarketClient {
   const baseUrl = BASE_URLS[env];
+  if (!baseUrl) {
+    throw new Error(`Invalid BrokerEnv: "${env}". Expected "prod" or "dev".`);
+  }
 
   return {
     async getRank(token: string, params: KiwoomRankParams): Promise<KiwoomRankResponse> {

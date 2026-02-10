@@ -8,6 +8,9 @@ const BASE_URLS: Record<BrokerEnv, string> = {
 
 export function createKiwoomAuthClient(env: BrokerEnv): AuthClient<KiwoomCredentials> {
   const baseUrl = BASE_URLS[env];
+  if (!baseUrl) {
+    throw new Error(`Invalid BrokerEnv: "${env}". Expected "prod" or "dev".`);
+  }
 
   return {
     async getToken(credentials: KiwoomCredentials): Promise<AuthToken> {

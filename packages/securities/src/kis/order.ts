@@ -289,6 +289,9 @@ async function fetchDailyOrders(
 
 export function createKisOrderClient(env: BrokerEnv): KisOrderClient {
   const baseUrl = BASE_URLS[env];
+  if (!baseUrl) {
+    throw new Error(`Invalid BrokerEnv: "${env}". Expected "prod" or "dev".`);
+  }
 
   return {
     async buyOrder(
