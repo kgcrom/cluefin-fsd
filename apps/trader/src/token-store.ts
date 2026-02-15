@@ -17,7 +17,8 @@ function hasD1(db: unknown): db is D1Database {
 }
 
 function envFallbackToken(env: Env, broker: BrokerName): string | null {
-  const raw = broker === "kis" ? env.BROKER_TOKEN_KIS : env.BROKER_TOKEN_KIWOOM;
+  if (broker === "kis") return null;
+  const raw = env.BROKER_TOKEN_KIWOOM;
   if (!raw) return null;
   const trimmed = String(raw).trim();
   return trimmed.length > 0 ? trimmed : null;

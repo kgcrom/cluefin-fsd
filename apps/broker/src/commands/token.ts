@@ -1,6 +1,6 @@
 import type { AuthToken } from "@cluefin/securities";
 import { createKisAuthClient, createKiwoomAuthClient } from "@cluefin/securities";
-import { DEV_VARS_PATH, parseBrokerEnv, requireEnv, WRANGLER_CONFIG } from "../utils";
+import { DEV_VARS_PATH, escapeSQL, parseBrokerEnv, requireEnv, WRANGLER_CONFIG } from "../utils";
 
 export type RunTokenPersistMode = "all" | "token-only";
 export type RunTokenOptions = {
@@ -66,7 +66,41 @@ async function upsertDevVar(key: string, value: string): Promise<void> {
   }
 
   await Bun.write(DEV_VARS_PATH, lines.join("\n"));
-  console.log(`.dev.vars에 ${key} 저장 완료`);
+  console.log(`.dev.vars에 ${key} 저장 완료\n`);
+}
+
+async function upsertD1Token(broker: string, token: AuthToken): Promise<void> {
+  const nowIso = new Date().toISOString();
+  const sql = `INSERT INTO broker_auth_tokens (broker, token, token_type, expires_at, updated_at)
+    VALUES ('${escapeSQL(broker)}', '${escapeSQL(token.token)}', '${escapeSQL(token.tokenType)}', '${escapeSQL(token.expiresAt.toISOString())}', '${escapeSQL(nowIso)}')
+    ON CONFLICT(broker) DO UPDATE SET
+      token = excluded.token,
+      token_type = excluded.token_type,
+      expires_at = excluded.expires_at,
+      updated_at = excluded.updated_at`;
+
+  const proc = Bun.spawn(
+    [
+      "bunx",
+      "wrangler",
+      "d1",
+      "execute",
+      "cluefin-fsd-db",
+      "--remote",
+      "--command",
+      sql,
+      "--config",
+      WRANGLER_CONFIG,
+    ],
+    { stdout: "inherit", stderr: "inherit" },
+  );
+
+  const exitCode = await proc.exited;
+  if (exitCode !== 0) {
+    console.error(`D1 broker_auth_tokens upsert 실패 (exit code: ${exitCode})`);
+    process.exit(1);
+  }
+  console.log(`broker_auth_tokens에 ${broker} 토큰 저장 완료`);
 }
 
 async function saveSecret(
@@ -112,8 +146,10 @@ export async function runToken(broker: string, options: RunTokenOptions = {}): P
 
   console.log(`토큰 발급 완료: ${token.token.substring(0, 10)}...`);
 
-  const tokenKey = broker === "kis" ? "BROKER_TOKEN_KIS" : "BROKER_TOKEN_KIWOOM";
-  await saveSecret(tokenKey, token.token, { local: opts.local });
+  await upsertD1Token(broker, token);
+  if (opts.local && broker !== "kis") {
+    await upsertDevVar("BROKER_TOKEN_KIWOOM", token.token);
+  }
 
   if (opts.persist === "token-only") return;
 

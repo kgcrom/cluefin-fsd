@@ -37,14 +37,17 @@ const mockEnv = {
   KIS_APP_KEY: "test-key",
   KIS_SECRET_KEY: "test-secret",
   KIS_ENV: "dev",
-  BROKER_TOKEN_KIS: "kis-token",
   KIS_ACCOUNT_NO: "12345",
   KIS_ACCOUNT_PRODUCT_CODE: "01",
   KIWOOM_APP_KEY: "test-key",
   KIWOOM_SECRET_KEY: "test-secret",
   KIWOOM_ENV: "dev",
   BROKER_TOKEN_KIWOOM: "kiwoom-token",
-  cluefin_fsd_db: {},
+  cluefin_fsd_db: {
+    prepare: () => ({
+      bind: () => ({ first: () => Promise.resolve(null), run: () => Promise.resolve() }),
+    }),
+  },
 };
 
 const mockCtx = { waitUntil: mock(), passThroughOnException: mock() };

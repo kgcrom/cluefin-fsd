@@ -55,18 +55,45 @@ mock.module("@cluefin/securities", () => ({
 
 const { handleOrderExecution, handleFillCheck } = await import("./cron");
 
+function createMockD1() {
+  const futureDate = new Date(Date.now() + 86_400_000).toISOString();
+  const tokenRows: Record<string, unknown> = {
+    kis: {
+      broker: "kis",
+      token: "kis-token",
+      token_type: "Bearer",
+      expires_at: futureDate,
+      updated_at: new Date().toISOString(),
+    },
+    kiwoom: {
+      broker: "kiwoom",
+      token: "kiwoom-token",
+      token_type: "Bearer",
+      expires_at: futureDate,
+      updated_at: new Date().toISOString(),
+    },
+  };
+  return {
+    prepare: () => ({
+      bind: (...args: unknown[]) => ({
+        first: () => Promise.resolve(tokenRows[args[0] as string] ?? null),
+        run: () => Promise.resolve(),
+      }),
+    }),
+  };
+}
+
 const mockEnv = {
   KIS_APP_KEY: "test-key",
   KIS_SECRET_KEY: "test-secret",
   KIS_ENV: "dev",
-  BROKER_TOKEN_KIS: "kis-token",
   KIS_ACCOUNT_NO: "12345",
   KIS_ACCOUNT_PRODUCT_CODE: "01",
   KIWOOM_APP_KEY: "test-key",
   KIWOOM_SECRET_KEY: "test-secret",
   KIWOOM_ENV: "dev",
   BROKER_TOKEN_KIWOOM: "kiwoom-token",
-  cluefin_fsd_db: {},
+  cluefin_fsd_db: createMockD1(),
 };
 
 afterEach(() => {

@@ -65,7 +65,6 @@ cp apps/trader/.dev.vars.example apps/trader/.dev.vars
 
 # 3. 토큰 발급 후 .dev.vars에 설정
 cd ../broker && bun run start kis
-#    BROKER_TOKEN_KIS={"token":"..."}
 bun run start kiwoom
 #    BROKER_TOKEN_KIWOOM=<토큰>
 
