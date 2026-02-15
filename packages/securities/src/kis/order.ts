@@ -213,6 +213,10 @@ async function placeOrder(
 
   const data: RawOrderResponse = await response.json();
 
+  if (data.rt_cd !== "0") {
+    throw new Error(`KIS order rejected: [${data.msg_cd}] ${data.msg1}`);
+  }
+
   return {
     rtCd: data.rt_cd,
     msgCd: data.msg_cd,

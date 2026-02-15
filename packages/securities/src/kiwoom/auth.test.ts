@@ -8,6 +8,8 @@ beforeEach(() => {
     Promise.resolve(
       new Response(
         JSON.stringify({
+          return_code: 0,
+          return_msg: "OK",
           token: "kiwoom-token-xyz",
           token_type: "Bearer",
           expires_dt: "20251231235959",
