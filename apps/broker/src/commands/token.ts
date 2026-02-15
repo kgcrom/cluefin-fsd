@@ -2,6 +2,22 @@ import type { AuthToken } from "@cluefin/securities";
 import { createKisAuthClient, createKiwoomAuthClient } from "@cluefin/securities";
 import { DEV_VARS_PATH, parseBrokerEnv, requireEnv, WRANGLER_CONFIG } from "../utils";
 
+export type RunTokenPersistMode = "all" | "token-only";
+export type RunTokenOptions = {
+  /**
+   * 로컬 개발용 vars 파일(apps/trader/.dev.vars)에 반영할지 여부.
+   * - true: wrangler secret put + .dev.vars upsert (기존 동작)
+   * - false: wrangler secret put만 수행 (요구사항: "secret만 업데이트")
+   */
+  local?: boolean;
+  /**
+   * 어떤 시크릿을 저장할지.
+   * - all: 토큰 + 관련 자격정보(기존 동작)
+   * - token-only: 토큰만 저장 (스케줄러 기본)
+   */
+  persist?: RunTokenPersistMode;
+};
+
 async function putSecret(key: string, value: string): Promise<void> {
   console.log(`wrangler secret put ${key} 실행 중...`);
 
@@ -22,6 +38,9 @@ async function putSecret(key: string, value: string): Promise<void> {
   console.log(`${key} 시크릿 저장 완료`);
 }
 
+// Broker CLI는 개발 편의를 위해 apps/trader/.dev.vars를 업데이트하곤 했는데,
+// Cloudflare Worker 크론(런타임)에서는 파일/시크릿을 직접 수정할 수 없으므로
+// 스케줄링은 apps/trader 쪽에서 D1 등에 저장하는 방식으로 처리한다.
 async function upsertDevVar(key: string, value: string): Promise<void> {
   const devVarsFile = Bun.file(DEV_VARS_PATH);
   const devVarsExists = await devVarsFile.exists();
@@ -50,17 +69,28 @@ async function upsertDevVar(key: string, value: string): Promise<void> {
   console.log(`.dev.vars에 ${key} 저장 완료`);
 }
 
-async function saveSecret(key: string, value: string): Promise<void> {
+async function saveSecret(
+  key: string,
+  value: string,
+  opts: Required<Pick<RunTokenOptions, "local">>,
+): Promise<void> {
   await putSecret(key, value);
-  await upsertDevVar(key, value);
+  if (opts.local) {
+    await upsertDevVar(key, value);
+  }
 }
 
 // TODO: broker에서 토큰 발급하는게 아니라 cloudflare cron으로 실행
-export async function runToken(broker: string): Promise<void> {
+export async function runToken(broker: string, options: RunTokenOptions = {}): Promise<void> {
   if (!["kis", "kiwoom"].includes(broker)) {
     console.error("Usage: bun run src/index.ts token <kis|kiwoom>");
     process.exit(1);
   }
+
+  const opts: Required<RunTokenOptions> = {
+    local: options.local ?? true,
+    persist: options.persist ?? "all",
+  };
 
   let token: AuthToken;
 
@@ -83,15 +113,19 @@ export async function runToken(broker: string): Promise<void> {
   console.log(`토큰 발급 완료: ${token.token.substring(0, 10)}...`);
 
   const tokenKey = broker === "kis" ? "BROKER_TOKEN_KIS" : "BROKER_TOKEN_KIWOOM";
-  await saveSecret(tokenKey, token.token);
+  await saveSecret(tokenKey, token.token, { local: opts.local });
+
+  if (opts.persist === "token-only") return;
 
   if (broker === "kis") {
-    await saveSecret("KIS_APP_KEY", requireEnv("KIS_APP_KEY"));
-    await saveSecret("KIS_SECRET_KEY", requireEnv("KIS_SECRET_KEY"));
-    await saveSecret("KIS_ACCOUNT_NO", requireEnv("KIS_ACCOUNT_NO"));
-    await saveSecret("KIS_ACCOUNT_PRODUCT_CODE", requireEnv("KIS_ACCOUNT_PRODUCT_CODE"));
+    await saveSecret("KIS_APP_KEY", requireEnv("KIS_APP_KEY"), { local: opts.local });
+    await saveSecret("KIS_SECRET_KEY", requireEnv("KIS_SECRET_KEY"), { local: opts.local });
+    await saveSecret("KIS_ACCOUNT_NO", requireEnv("KIS_ACCOUNT_NO"), { local: opts.local });
+    await saveSecret("KIS_ACCOUNT_PRODUCT_CODE", requireEnv("KIS_ACCOUNT_PRODUCT_CODE"), {
+      local: opts.local,
+    });
   } else {
-    await saveSecret("KIWOOM_APP_KEY", requireEnv("KIWOOM_APP_KEY"));
-    await saveSecret("KIWOOM_SECRET_KEY", requireEnv("KIWOOM_SECRET_KEY"));
+    await saveSecret("KIWOOM_APP_KEY", requireEnv("KIWOOM_APP_KEY"), { local: opts.local });
+    await saveSecret("KIWOOM_SECRET_KEY", requireEnv("KIWOOM_SECRET_KEY"), { local: opts.local });
   }
 }
