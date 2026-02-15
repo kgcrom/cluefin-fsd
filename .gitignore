@@ -9,3 +9,5 @@ dist/
 
 # cloudflare
 .wrangler/
+
+.claude/settings.local.json
