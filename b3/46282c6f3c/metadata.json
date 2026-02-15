@@ -3,9 +3,13 @@
   "checkpoint_id": "b346282c6f3c",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 1,
+  "checkpoints_count": 2,
   "files_touched": [
-    ".claude/settings.json"
+    ".claude/settings.json",
+    "packages/securities/src/kis/index.ts",
+    "packages/securities/src/kis/market.test.ts",
+    "packages/securities/src/kis/market.ts",
+    "packages/securities/src/kis/types.ts"
   ],
   "sessions": [
     {
@@ -14,13 +18,20 @@
       "context": "/b3/46282c6f3c/0/context.md",
       "content_hash": "/b3/46282c6f3c/0/content_hash.txt",
       "prompt": "/b3/46282c6f3c/0/prompt.txt"
+    },
+    {
+      "metadata": "/b3/46282c6f3c/1/metadata.json",
+      "transcript": "/b3/46282c6f3c/1/full.jsonl",
+      "context": "/b3/46282c6f3c/1/context.md",
+      "content_hash": "/b3/46282c6f3c/1/content_hash.txt",
+      "prompt": "/b3/46282c6f3c/1/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 44,
-    "cache_creation_tokens": 136654,
-    "cache_read_tokens": 1689570,
-    "output_tokens": 5560,
-    "api_call_count": 30
+    "input_tokens": 67,
+    "cache_creation_tokens": 172519,
+    "cache_read_tokens": 2616134,
+    "output_tokens": 7574,
+    "api_call_count": 50
   }
 }

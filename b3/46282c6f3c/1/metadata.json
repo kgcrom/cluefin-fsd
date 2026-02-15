@@ -1,0 +1,33 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "b346282c6f3c",
+  "session_id": "c30fb1a4-8251-4b5e-89ab-72a772fbb2bc",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-15T13:35:35.566984Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "packages/securities/src/kis/index.ts",
+    "packages/securities/src/kis/market.test.ts",
+    "packages/securities/src/kis/market.ts",
+    "packages/securities/src/kis/types.ts"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 23,
+    "cache_creation_tokens": 35865,
+    "cache_read_tokens": 926564,
+    "output_tokens": 2014,
+    "api_call_count": 20
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-15T13:35:35.491188Z",
+    "agent_lines": 295,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 295,
+    "agent_percentage": 100
+  },
+  "transcript_path": ".claude/projects/-Volumes-kgcrom-2tb-kgcrom-workspace-cluefin-fsd/c30fb1a4-8251-4b5e-89ab-72a772fbb2bc.jsonl"
+}
