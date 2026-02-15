@@ -8,16 +8,16 @@ import {
 } from "@cluefin/securities";
 import { Hono } from "hono";
 import type { Env } from "./bindings";
+import { getBrokerToken } from "./token-store";
 
 const app = new Hono<{ Bindings: Env }>();
 
 app.get("/kis/intraday-chart", async (c) => {
-  const raw = c.env.BROKER_TOKEN_KIS;
-  if (!raw) {
+  const token = await getBrokerToken(c.env, "kis");
+  if (!token) {
     return c.json({ error: "KIS 토큰이 설정되지 않았습니다" }, 401);
   }
 
-  const token = raw;
   const env = c.env.KIS_ENV as BrokerEnv;
   const credentials = {
     appkey: c.env.KIS_APP_KEY,
@@ -44,7 +44,7 @@ app.get("/kis/intraday-chart", async (c) => {
 });
 
 app.get("/kiwoom/rank", async (c) => {
-  const token = c.env.BROKER_TOKEN_KIWOOM;
+  const token = await getBrokerToken(c.env, "kiwoom");
   if (!token) {
     return c.json({ error: "Kiwoom 토큰이 설정되지 않았습니다" }, 401);
   }
@@ -72,7 +72,7 @@ app.get("/kiwoom/rank", async (c) => {
 });
 
 app.get("/kiwoom/volume-surge", async (c) => {
-  const token = c.env.BROKER_TOKEN_KIWOOM;
+  const token = await getBrokerToken(c.env, "kiwoom");
   if (!token) {
     return c.json({ error: "Kiwoom 토큰이 설정되지 않았습니다" }, 401);
   }

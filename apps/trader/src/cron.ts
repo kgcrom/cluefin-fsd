@@ -10,11 +10,15 @@ import {
 } from "@cluefin/securities";
 import type { Env } from "./bindings";
 import { getTodayKst, isFillCheckTime, isOrderExecutionTime } from "./time-utils";
+import { getBrokerToken, refreshBrokerToken } from "./token-store";
+
+const TOKEN_REFRESH_CRON = "0 */3 * * *";
 
 async function executeKisOrder(
   env: Env,
   order: TradeOrder,
   quantity: number,
+  kisToken: string,
 ): Promise<{ brokerOrderId: string; brokerResponse: string }> {
   const kisEnv = env.KIS_ENV as BrokerEnv;
   const credentials = { appkey: env.KIS_APP_KEY, appsecret: env.KIS_SECRET_KEY };
@@ -31,8 +35,8 @@ async function executeKisOrder(
 
   const result =
     order.side === "buy"
-      ? await client.buyOrder(credentials, env.BROKER_TOKEN_KIS, params)
-      : await client.sellOrder(credentials, env.BROKER_TOKEN_KIS, params);
+      ? await client.buyOrder(credentials, kisToken, params)
+      : await client.sellOrder(credentials, kisToken, params);
 
   return {
     brokerOrderId: result.output.odno,
@@ -44,6 +48,7 @@ async function executeKiwoomOrder(
   env: Env,
   order: TradeOrder,
   quantity: number,
+  kiwoomToken: string,
 ): Promise<{ brokerOrderId: string; brokerResponse: string }> {
   const kiwoomEnv = env.KIWOOM_ENV as BrokerEnv;
   const client = createKiwoomOrderClient(kiwoomEnv);
@@ -60,7 +65,9 @@ async function executeKiwoomOrder(
     ordUv: String(order.referencePrice),
   };
 
-  const result = await client.buyOrder(env.BROKER_TOKEN_KIWOOM, params);
+  // NOTE: Kiwoom 주문 클라이언트는 토큰만 받는다.
+  // apps/trader는 런타임에서 secret을 갱신할 수 없으므로 D1에 저장한 최신 토큰을 사용한다.
+  const result = await client.buyOrder(kiwoomToken, params);
 
   return {
     brokerOrderId: result.ordNo,
@@ -73,6 +80,9 @@ export async function handleOrderExecution(env: Env): Promise<void> {
   const orders = await repo.getActiveOrders();
 
   console.log(`[cron] 활성 주문 ${orders.length}건 조회`);
+
+  const kisToken = await getBrokerToken(env, "kis");
+  const kiwoomToken = await getBrokerToken(env, "kiwoom");
 
   let processedCount = 0;
 
@@ -97,13 +107,13 @@ export async function handleOrderExecution(env: Env): Promise<void> {
 
       let quantity: number;
       if (order.side === "buy") {
-        const maxQty = Math.floor(200000 / order.referencePrice);
+        const maxQty = Math.floor(300000 / order.referencePrice);
         quantity = Math.min(remaining, maxQty);
       } else {
         quantity = remaining === 1 ? 1 : Math.floor(remaining / 2);
       }
 
-      // 한주당 20만원이 넘는 주식을 매수하는 경우 발생
+      // 한주당 30만원이 넘는 주식을 매수하는 경우 발생
       if (quantity <= 0) {
         console.log(
           `[cron] 주문 건너뜀: order_id=${order.id}, 사유=분할수량 0 (referencePrice=${order.referencePrice})`,
@@ -115,8 +125,21 @@ export async function handleOrderExecution(env: Env): Promise<void> {
         `[cron] 분할 수량 계산: order_id=${order.id}, total=${order.quantity}, requested=${requestedQty}, remaining=${remaining}, thisRound=${quantity}`,
       );
 
-      const executeOrder = order.broker === "kis" ? executeKisOrder : executeKiwoomOrder;
-      const { brokerOrderId, brokerResponse } = await executeOrder(env, order, quantity);
+      let brokerOrderId: string;
+      let brokerResponse: string;
+
+      if (order.broker === "kis") {
+        if (!kisToken) throw new Error("KIS 토큰이 설정되지 않았습니다");
+        ({ brokerOrderId, brokerResponse } = await executeKisOrder(env, order, quantity, kisToken));
+      } else {
+        if (!kiwoomToken) throw new Error("Kiwoom 토큰이 설정되지 않았습니다");
+        ({ brokerOrderId, brokerResponse } = await executeKiwoomOrder(
+          env,
+          order,
+          quantity,
+          kiwoomToken,
+        ));
+      }
 
       await repo.createExecution({
         orderId: order.id,
@@ -154,6 +177,9 @@ async function checkKisFills(env: Env, executions: TradeExecution[]): Promise<vo
 
   console.log(`[fillCheck] KIS 체결 확인 시작: ${executions.length}건`);
 
+  const token = await getBrokerToken(env, "kis");
+  if (!token) throw new Error("KIS 토큰이 설정되지 않았습니다");
+
   const kisEnv = env.KIS_ENV as BrokerEnv;
   const credentials = { appkey: env.KIS_APP_KEY, appsecret: env.KIS_SECRET_KEY };
   const client = createKisOrderClient(kisEnv);
@@ -167,7 +193,7 @@ async function checkKisFills(env: Env, executions: TradeExecution[]): Promise<vo
     endDate: today,
   };
 
-  const response = await client.getDailyOrders(credentials, env.BROKER_TOKEN_KIS, params);
+  const response = await client.getDailyOrders(credentials, token, params);
 
   // Map: broker_order_id -> order data
   const orderMap = new Map(response.output1.map((order) => [order.odno, order]));
@@ -207,6 +233,9 @@ async function checkKiwoomFills(env: Env, executions: TradeExecution[]): Promise
 
   console.log(`[fillCheck] Kiwoom 체결 확인 시작: ${executions.length}건`);
 
+  const token = await getBrokerToken(env, "kiwoom");
+  if (!token) throw new Error("Kiwoom 토큰이 설정되지 않았습니다");
+
   const kiwoomEnv = env.KIWOOM_ENV as BrokerEnv;
   const client = createKiwoomOrderClient(kiwoomEnv);
   const repo = createOrderRepository(env.cluefin_fsd_db);
@@ -217,7 +246,7 @@ async function checkKiwoomFills(env: Env, executions: TradeExecution[]): Promise
     stexTp: "1", // 1: 국내주식
   };
 
-  const response = await client.getDailyOrders(env.BROKER_TOKEN_KIWOOM, params);
+  const response = await client.getDailyOrders(token, params);
 
   // Map: broker_order_id -> order data
   const orderMap = new Map(response.cntr.map((order) => [order.ordNo, order]));
@@ -293,7 +322,7 @@ export async function handleFillCheck(env: Env): Promise<void> {
 }
 
 export async function handleScheduled(
-  _event: ScheduledEvent,
+  event: ScheduledEvent,
   env: Env,
   ctx: ExecutionContext,
 ): Promise<void> {
@@ -302,6 +331,24 @@ export async function handleScheduled(
   const runFill = isFillCheckTime();
 
   console.log(`[cron] 스케줄 트리거: ${now}, 주문실행=${runOrder}, 체결확인=${runFill}`);
+
+  if (event.cron === TOKEN_REFRESH_CRON) {
+    console.log("[cron] 토큰 갱신 시작");
+    ctx.waitUntil(
+      (async () => {
+        const results = await Promise.allSettled([
+          refreshBrokerToken(env, "kis"),
+          refreshBrokerToken(env, "kiwoom"),
+        ]);
+        const failed = results.filter((r) => r.status === "rejected") as PromiseRejectedResult[];
+        if (failed.length > 0) {
+          console.error("[cron] 토큰 갱신 실패:", failed.map((f) => String(f.reason)).join("\n"));
+        } else {
+          console.log("[cron] 토큰 갱신 완료");
+        }
+      })(),
+    );
+  }
 
   if (runOrder) {
     console.log("[cron] 주문 실행 시작");

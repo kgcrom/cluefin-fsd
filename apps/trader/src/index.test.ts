@@ -12,11 +12,17 @@ mock.module("@cluefin/cloudflare", () => ({
 }));
 
 mock.module("@cluefin/securities", () => ({
+  createKisAuthClient: () => ({
+    getToken: mock(),
+  }),
   createKisMarketClient: () => ({}),
   createKisOrderClient: () => ({
     buyOrder: mock(),
     sellOrder: mock(),
     getDailyOrders: mock(),
+  }),
+  createKiwoomAuthClient: () => ({
+    getToken: mock(),
   }),
   createKiwoomMarketClient: () => ({}),
   createKiwoomOrderClient: () => ({
