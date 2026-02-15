@@ -326,6 +326,153 @@ export interface KisDailyOrderResponse {
   ctxAreaNk100?: string;
 }
 
+/** 주식잔고조회 파라미터 */
+export interface KisBalanceParams {
+  /** 계좌번호 체계(8-2)의 앞 8자리 */
+  accountNo: string;
+  /** 계좌번호 체계(8-2)의 뒤 2자리 */
+  accountProductCode: string;
+  /** 시간외단일가여부 (N/Y/X, 기본 N) */
+  afterHoursFloorPrice?: string;
+  /** 조회구분 (01:대출일별, 02:종목별, 기본 02) */
+  inquiryDivision?: string;
+  /** 단가구분 (01:기본값) */
+  unitPriceDivision?: string;
+  /** 펀드결제분포함여부 (N/Y, 기본 N) */
+  fundSettlementIncluded?: string;
+  /** 융자금액자동상환여부 (기본 N) */
+  loanAutoRepayment?: string;
+  /** 처리구분 (00:전일매매포함, 01:미포함, 기본 00) */
+  processDivision?: string;
+  /** 연속조회검색조건 */
+  ctxAreaFk100?: string;
+  /** 연속조회키 */
+  ctxAreaNk100?: string;
+}
+
+/** 주식잔고조회 응답 - 보유종목 */
+export interface KisBalanceItem {
+  /** 종목번호 */
+  pdno: string;
+  /** 종목명 */
+  prdtName: string;
+  /** 매매구분명 */
+  tradDvsnName: string;
+  /** 전일매수수량 */
+  bfdyBuyQty: string;
+  /** 전일매도수량 */
+  bfdySllQty: string;
+  /** 금일매수수량 */
+  thdtBuyqty: string;
+  /** 금일매도수량 */
+  thdtSllQty: string;
+  /** 보유수량 */
+  hldgQty: string;
+  /** 주문가능수량 */
+  ordPsblQty: string;
+  /** 매입평균가격 */
+  pchsAvgPric: string;
+  /** 매입금액 */
+  pchsAmt: string;
+  /** 현재가 */
+  prpr: string;
+  /** 평가금액 */
+  evluAmt: string;
+  /** 평가손익금액 */
+  evluPflsAmt: string;
+  /** 평가손익율 */
+  evluPflsRt: string;
+  /** 평가수익율 */
+  evluErngRt: string;
+  /** 대출일자 */
+  loanDt: string;
+  /** 대출금액 */
+  loanAmt: string;
+  /** 대주매각대금 */
+  stlnSlngChgs: string;
+  /** 만기일자 */
+  expdDt: string;
+  /** 등락율 */
+  flttRt: string;
+  /** 전일대비증감 */
+  bfdyCprsIcdc: string;
+  /** 종목증거금율명 */
+  itemMgnaRtName: string;
+  /** 보증금율명 */
+  grtaRtName: string;
+  /** 대용가격 */
+  sbstPric: string;
+  /** 주식대출단가 */
+  stckLoanUnpr: string;
+}
+
+/** 주식잔고조회 응답 - 계좌 요약 */
+export interface KisBalanceSummary {
+  /** 예수금총금액 */
+  dncaTotAmt: string;
+  /** 익일정산금액 (D+1) */
+  nxdyExccAmt: string;
+  /** 가수도정산금액 (D+2) */
+  prvsRcdlExccAmt: string;
+  /** CMA평가금액 */
+  cmaEvluAmt: string;
+  /** 전일매수금액 */
+  bfdyBuyAmt: string;
+  /** 금일매수금액 */
+  thdtBuyAmt: string;
+  /** 익일자동상환금액 */
+  nxdyAutoRdptAmt: string;
+  /** 전일매도금액 */
+  bfdySllAmt: string;
+  /** 금일매도금액 */
+  thdtSllAmt: string;
+  /** D+2자동상환금액 */
+  d2AutoRdptAmt: string;
+  /** 전일제비용금액 */
+  bfdyTlexAmt: string;
+  /** 금일제비용금액 */
+  thdtTlexAmt: string;
+  /** 총대출금액 */
+  totLoanAmt: string;
+  /** 유가평가금액 */
+  sctsEvluAmt: string;
+  /** 총평가금액 */
+  totEvluAmt: string;
+  /** 순자산금액 */
+  nassAmt: string;
+  /** 융자금자동상환여부 */
+  fncgGldAutoRdptYn: string;
+  /** 매입금액합계 */
+  pchsAmtSmtlAmt: string;
+  /** 평가금액합계 */
+  evluAmtSmtlAmt: string;
+  /** 평가손익합계 */
+  evluPflsSmtlAmt: string;
+  /** 총대주매각대금 */
+  totStlnSlngChgs: string;
+  /** 전일총자산평가금액 */
+  bfdyTotAsstEvluAmt: string;
+  /** 자산증감액 */
+  asstIcdcAmt: string;
+  /** 자산증감수익율 */
+  asstIcdcErngRt: string;
+}
+
+/** 주식잔고조회 응답 */
+export interface KisBalanceResponse {
+  rtCd: string;
+  msgCd: string;
+  msg1: string;
+  output1: KisBalanceItem[];
+  output2: KisBalanceSummary;
+  /** 연속조회 여부 (M: 다음 데이터 있음) */
+  trCont?: string;
+  /** 연속조회검색조건 */
+  ctxAreaFk100?: string;
+  /** 연속조회키 */
+  ctxAreaNk100?: string;
+}
+
 /** 국내업종 현재지수 조회 파라미터 */
 export interface KisIndexPriceParams {
   /** 업종코드 (코스피: 0001, 코스닥: 1001, 코스피200: 2001 등) */

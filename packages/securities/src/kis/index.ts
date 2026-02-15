@@ -2,6 +2,10 @@ export { createKisAuthClient } from "./auth";
 export { createKisMarketClient } from "./market";
 export { createKisOrderClient } from "./order";
 export type {
+  KisBalanceItem,
+  KisBalanceParams,
+  KisBalanceResponse,
+  KisBalanceSummary,
   KisCredentials,
   KisDailyOrderItem,
   KisDailyOrderParams,

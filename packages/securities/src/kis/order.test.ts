@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import { createKisOrderClient } from "./order";
-import type { KisDailyOrderParams, KisOrderParams } from "./types";
+import type { KisBalanceParams, KisDailyOrderParams, KisOrderParams } from "./types";
 
 const originalFetch = globalThis.fetch;
 
@@ -169,5 +169,163 @@ describe("getDailyOrders", () => {
     expect(client.getDailyOrders(credentials, token, dailyOrderParams)).rejects.toThrow(
       "KIS daily order inquiry failed: 403 Forbidden",
     );
+  });
+});
+
+const rawBalanceResponse = {
+  rt_cd: "0",
+  msg_cd: "KIOK0000",
+  msg1: "정상처리 되었습니다.",
+  output1: [
+    {
+      pdno: "005930",
+      prdt_name: "삼성전자",
+      trad_dvsn_name: "현금",
+      bfdy_buy_qty: "0",
+      bfdy_sll_qty: "0",
+      thdt_buyqty: "10",
+      thdt_sll_qty: "0",
+      hldg_qty: "10",
+      ord_psbl_qty: "10",
+      pchs_avg_pric: "66000.0000",
+      pchs_amt: "660000",
+      prpr: "67000",
+      evlu_amt: "670000",
+      evlu_pfls_amt: "10000",
+      evlu_pfls_rt: "1.52",
+      evlu_erng_rt: "1.51515152",
+      loan_dt: "",
+      loan_amt: "0",
+      stln_slng_chgs: "0",
+      expd_dt: "",
+      fltt_rt: "1.52",
+      bfdy_cprs_icdc: "1000",
+      item_mgna_rt_name: "20%",
+      grta_rt_name: "",
+      sbst_pric: "53600",
+      stck_loan_unpr: "0",
+    },
+  ],
+  output2: [
+    {
+      dnca_tot_amt: "1000000",
+      nxdy_excc_amt: "1000000",
+      prvs_rcdl_excc_amt: "1000000",
+      cma_evlu_amt: "0",
+      bfdy_buy_amt: "0",
+      thdt_buy_amt: "660000",
+      nxdy_auto_rdpt_amt: "0",
+      bfdy_sll_amt: "0",
+      thdt_sll_amt: "0",
+      d2_auto_rdpt_amt: "0",
+      bfdy_tlex_amt: "0",
+      thdt_tlex_amt: "0",
+      tot_loan_amt: "0",
+      scts_evlu_amt: "670000",
+      tot_evlu_amt: "1670000",
+      nass_amt: "1670000",
+      fncg_gld_auto_rdpt_yn: "N",
+      pchs_amt_smtl_amt: "660000",
+      evlu_amt_smtl_amt: "670000",
+      evlu_pfls_smtl_amt: "10000",
+      tot_stln_slng_chgs: "0",
+      bfdy_tot_asst_evlu_amt: "1660000",
+      asst_icdc_amt: "10000",
+      asst_icdc_erng_rt: "0.60240964",
+    },
+  ],
+  tr_cont: "",
+  ctx_area_fk100: "",
+  ctx_area_nk100: "",
+};
+
+const balanceParams: KisBalanceParams = {
+  accountNo: "50068923",
+  accountProductCode: "01",
+};
+
+describe("getBalance", () => {
+  test("fetches balance with correct URL and headers (production)", async () => {
+    globalThis.fetch = mock(() =>
+      Promise.resolve(new Response(JSON.stringify(rawBalanceResponse), { status: 200 })),
+    );
+
+    const client = createKisOrderClient("prod");
+    const result = await client.getBalance(credentials, token, balanceParams);
+
+    expect(result.rtCd).toBe("0");
+    expect(result.output1).toHaveLength(1);
+    expect(result.output1[0].pdno).toBe("005930");
+    expect(result.output1[0].prdtName).toBe("삼성전자");
+    expect(result.output1[0].hldgQty).toBe("10");
+    expect(result.output1[0].evluPflsAmt).toBe("10000");
+    expect(result.output2.dncaTotAmt).toBe("1000000");
+    expect(result.output2.totEvluAmt).toBe("1670000");
+    expect(result.output2.evluPflsSmtlAmt).toBe("10000");
+
+    const fetchCall = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
+    const url = fetchCall[0] as string;
+    const options = fetchCall[1] as RequestInit;
+
+    expect(url).toContain("/uapi/domestic-stock/v1/trading/inquire-balance");
+    expect(url).toContain("CANO=50068923");
+    expect(url).toContain("ACNT_PRDT_CD=01");
+    expect(options.headers).toHaveProperty("tr_id", "TTTC8434R");
+  });
+
+  test("uses dev TR ID for dev environment", async () => {
+    globalThis.fetch = mock(() =>
+      Promise.resolve(new Response(JSON.stringify(rawBalanceResponse), { status: 200 })),
+    );
+
+    const client = createKisOrderClient("dev");
+    await client.getBalance(credentials, token, balanceParams);
+
+    const fetchCall = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
+    const options = fetchCall[1] as RequestInit;
+
+    expect(options.headers).toHaveProperty("tr_id", "VTTC8434R");
+  });
+
+  test("throws on HTTP error", async () => {
+    globalThis.fetch = mock(() =>
+      Promise.resolve(new Response("Forbidden", { status: 403, statusText: "Forbidden" })),
+    );
+
+    const client = createKisOrderClient("prod");
+
+    expect(client.getBalance(credentials, token, balanceParams)).rejects.toThrow(
+      "KIS balance inquiry failed: 403 Forbidden",
+    );
+  });
+
+  test("maps snake_case response to camelCase", async () => {
+    globalThis.fetch = mock(() =>
+      Promise.resolve(new Response(JSON.stringify(rawBalanceResponse), { status: 200 })),
+    );
+
+    const client = createKisOrderClient("prod");
+    const result = await client.getBalance(credentials, token, balanceParams);
+
+    const item = result.output1[0];
+    expect(item.tradDvsnName).toBe("현금");
+    expect(item.bfdyBuyQty).toBe("0");
+    expect(item.thdtBuyqty).toBe("10");
+    expect(item.pchsAvgPric).toBe("66000.0000");
+    expect(item.pchsAmt).toBe("660000");
+    expect(item.prpr).toBe("67000");
+    expect(item.evluAmt).toBe("670000");
+    expect(item.evluPflsRt).toBe("1.52");
+    expect(item.itemMgnaRtName).toBe("20%");
+    expect(item.sbstPric).toBe("53600");
+
+    const summary = result.output2;
+    expect(summary.nxdyExccAmt).toBe("1000000");
+    expect(summary.sctsEvluAmt).toBe("670000");
+    expect(summary.nassAmt).toBe("1670000");
+    expect(summary.pchsAmtSmtlAmt).toBe("660000");
+    expect(summary.evluAmtSmtlAmt).toBe("670000");
+    expect(summary.bfdyTotAsstEvluAmt).toBe("1660000");
+    expect(summary.asstIcdcErngRt).toBe("0.60240964");
   });
 });
