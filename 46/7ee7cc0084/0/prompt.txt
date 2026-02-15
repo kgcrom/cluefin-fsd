@@ -1,0 +1,70 @@
+Implement the following plan:
+
+# Plan: cron.ts에 KIS 시세 조회 연동 + market 필드 추가
+
+## Context
+`handleOrderExecution`에서 KIS 매수/매도 주문 실행 전에 종목 현재가(`getStockPrice`)와 업종 지수(`getIndexPrice`)를 조회하도록 연동한다. 업종 지수 조회를 위해 `trade_orders` 테이블에 `market` 컬럼(KOSPI/KOSDAQ)을 추가한다. 실제 매수/매도 조건 판단 로직은 이후 별도 구현 예정이며, 이번에는 데이터 조회 + 로깅까지만 한다.
+
+## 변경 사항
+
+### 1. D1 마이그레이션 추가
+**파일**: `apps/trader/migrations/0004_add_market_to_trade_orders.sql`
+- `trade_orders` 테이블에 `market TEXT NOT NULL DEFAULT 'kospi' CHECK (market IN ('kospi', 'kosdaq'))` 컬럼 추가
+
+### 2. cloudflare 패키지 타입/매퍼 수정
+**파일**: `packages/cloudflare/src/d1/types.ts`
+- `OrderMarket` 타입 추가: `"kospi" | "kosdaq"`
+- `TradeOrder`에 `market: OrderMarket` 필드 추가
+- `TradeOrderRow`에 `market: OrderMarket` 필드 추가
+- `CreateTradeOrderInput`에 `market?: OrderMarket` 필드 추가
+
+**파일**: `packages/cloudflare/src/d1/mapper.ts`
+- `toTradeOrder`에 `market: row.market` 매핑 추가
+
+### 3. securities 패키지 barrel export 보완
+**파일**: `packages/securities/src/index.ts`
+- `KisIndexPriceOutput`, `KisIndexPriceParams`, `KisIndexPriceResponse` 타입 export 추가
+
+### 4. cron.ts 시세 조회 연동
+**파일**: `apps/trader/src/cron.ts`
+- import 추가: `createKisMarketClient`, `type KisStockPriceResponse`, `type KisIndexPriceResponse`
+- `handleOrderExecution` 내에서 KIS market client 생성 (orders 루프 밖, 한 번만)
+- KIS 주문 루프 안 (기존 TODO 주석 위치, 95-96행)에서:
+  - `getStockPrice(credentials, kisToken, { marketCode: "J", stockCode: order.stockCode })` 호출
+  - `getIndexPrice(credentials, kisToken, { sectorCode })` 호출 — sectorCode는 `order.market` 기반으로 결정 (TODO)
+  - 조회 결과 로깅
+  - 매수/매도 조건 판단은 TODO로 남김
+
+```typescript
+// cron.ts 주요 변경 구조
+const marketClient = createKisMarketClient(kisEnv);
+const credentials = { appkey: env.KIS_APP_KEY, appsecret: env.KIS_SECRET_KEY };
+
+// 루프 안, 주문 실행 전:
+if (order.broker === "kis") {
+  const stockPrice = await marketClient.getStockPrice(credentials, kisToken!, {
+    marketCode: "J",
+    stockCode: order.stockCode,
+  });
+  // TODO: order.market 기반 업종코드 매핑
+  const sectorCode = "0001"; // 임시 KOSPI 고정
+  const indexPrice = await marketClient.getIndexPrice(credentials, kisToken!, {
+    sectorCode,
+  });
+  console.log(
+    `[cron] 시세 조회: stock=${order.stockCode}, 현재가=${stockPrice.output.stckPrpr}, 업종지수=${indexPrice.output.bstpNmixPrpr}`,
+  );
+  // TODO: 매수 조건식 — stockPrice/indexPrice 기반 조건 충족 여부 판단
+  // TODO: 매도 조건식 — 보유 종목의 수익률/손실률 기반 매도 시점 판단
+}
+```
+
+## Verification
+- `bun test packages/securities` — 기존 market 테스트 통과
+- `bun test packages/cloudflare` — cloudflare 패키지 테스트 통과
+- `bun run check` — lint/format 검사
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /Volumes/kgcrom-2tb/kgcrom/.REDACTED.jsonl
+
+If this plan can be broken down into multiple independent tasks, consider using the TeamCreate tool to create a team and parallelize the work.

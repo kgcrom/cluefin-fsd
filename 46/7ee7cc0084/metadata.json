@@ -1,0 +1,32 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "467ee7cc0084",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "apps/trader/migrations/0004_add_market_to_trade_orders.sql",
+    "apps/trader/src/cron.ts",
+    "packages/cloudflare/src/d1/mapper.test.ts",
+    "packages/cloudflare/src/d1/mapper.ts",
+    "packages/cloudflare/src/d1/repository.test.ts",
+    "packages/cloudflare/src/d1/types.ts",
+    "packages/securities/src/index.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/46/7ee7cc0084/0/metadata.json",
+      "transcript": "/46/7ee7cc0084/0/full.jsonl",
+      "context": "/46/7ee7cc0084/0/context.md",
+      "content_hash": "/46/7ee7cc0084/0/content_hash.txt",
+      "prompt": "/46/7ee7cc0084/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 19,
+    "cache_creation_tokens": 25350,
+    "cache_read_tokens": 644820,
+    "output_tokens": 3559,
+    "api_call_count": 17
+  }
+}
