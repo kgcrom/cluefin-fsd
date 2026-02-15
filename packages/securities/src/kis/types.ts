@@ -325,3 +325,57 @@ export interface KisDailyOrderResponse {
   /** 연속조회키 */
   ctxAreaNk100?: string;
 }
+
+/** 국내업종 현재지수 조회 파라미터 */
+export interface KisIndexPriceParams {
+  /** 업종코드 (코스피: 0001, 코스닥: 1001, 코스피200: 2001 등) */
+  sectorCode: string;
+}
+
+/** 국내업종 현재지수 조회 응답 output */
+export interface KisIndexPriceOutput {
+  bstpNmixPrpr: string;
+  bstpNmixPrdyVrss: string;
+  prdyVrssSign: string;
+  bstpNmixPrdyCtrt: string;
+  acmlVol: string;
+  prdyVol: string;
+  acmlTrPbmn: string;
+  prdyTrPbmn: string;
+  bstpNmixOprc: string;
+  prdyNmixVrssNmixOprc: string;
+  oprcVrssPrprSign: string;
+  bstpNmixOprcPrdyCtrt: string;
+  bstpNmixHgpr: string;
+  prdyNmixVrssNmixHgpr: string;
+  hgprVrssPrprSign: string;
+  bstpNmixHgprPrdyCtrt: string;
+  bstpNmixLwpr: string;
+  prdyClprVrssLwpr: string;
+  lwprVrssPrprSign: string;
+  prdyClprVrssLwprRate: string;
+  ascnIssuCnt: string;
+  uplmIssuCnt: string;
+  stnrIssuCnt: string;
+  downIssuCnt: string;
+  lslmIssuCnt: string;
+  dryyBstpNmixHgpr: string;
+  dryyHgprVrssPrprRate: string;
+  dryyBstpNmixHgprDate: string;
+  dryyBstpNmixLwpr: string;
+  dryyLwprVrssPrprRate: string;
+  dryyBstpNmixLwprDate: string;
+  totalAskpRsqn: string;
+  totalBidpRsqn: string;
+  selnRsqnRate: string;
+  shnuRsqnRate: string;
+  ntbyRsqn: string;
+}
+
+/** 국내업종 현재지수 조회 응답 */
+export interface KisIndexPriceResponse {
+  rtCd: string;
+  msgCd: string;
+  msg1: string;
+  output: KisIndexPriceOutput;
+}

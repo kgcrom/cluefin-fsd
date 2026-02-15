@@ -1,6 +1,9 @@
 import type { BrokerEnv } from "../types";
 import type {
   KisCredentials,
+  KisIndexPriceOutput,
+  KisIndexPriceParams,
+  KisIndexPriceResponse,
   KisIntradayChartOutput1,
   KisIntradayChartOutput2,
   KisIntradayChartParams,
@@ -26,6 +29,11 @@ interface KisMarketClient {
     token: string,
     params: KisStockPriceParams,
   ): Promise<KisStockPriceResponse>;
+  getIndexPrice(
+    credentials: KisCredentials,
+    token: string,
+    params: KisIndexPriceParams,
+  ): Promise<KisIndexPriceResponse>;
 }
 
 interface RawIntradayChartOutput1 {
@@ -174,6 +182,93 @@ interface RawStockPriceResponse {
   msg_cd: string;
   msg1: string;
   output: RawStockPriceOutput;
+}
+
+interface RawIndexPriceOutput {
+  bstp_nmix_prpr: string;
+  bstp_nmix_prdy_vrss: string;
+  prdy_vrss_sign: string;
+  bstp_nmix_prdy_ctrt: string;
+  acml_vol: string;
+  prdy_vol: string;
+  acml_tr_pbmn: string;
+  prdy_tr_pbmn: string;
+  bstp_nmix_oprc: string;
+  prdy_nmix_vrss_nmix_oprc: string;
+  oprc_vrss_prpr_sign: string;
+  bstp_nmix_oprc_prdy_ctrt: string;
+  bstp_nmix_hgpr: string;
+  prdy_nmix_vrss_nmix_hgpr: string;
+  hgpr_vrss_prpr_sign: string;
+  bstp_nmix_hgpr_prdy_ctrt: string;
+  bstp_nmix_lwpr: string;
+  prdy_clpr_vrss_lwpr: string;
+  lwpr_vrss_prpr_sign: string;
+  prdy_clpr_vrss_lwpr_rate: string;
+  ascn_issu_cnt: string;
+  uplm_issu_cnt: string;
+  stnr_issu_cnt: string;
+  down_issu_cnt: string;
+  lslm_issu_cnt: string;
+  dryy_bstp_nmix_hgpr: string;
+  dryy_hgpr_vrss_prpr_rate: string;
+  dryy_bstp_nmix_hgpr_date: string;
+  dryy_bstp_nmix_lwpr: string;
+  dryy_lwpr_vrss_prpr_rate: string;
+  dryy_bstp_nmix_lwpr_date: string;
+  total_askp_rsqn: string;
+  total_bidp_rsqn: string;
+  seln_rsqn_rate: string;
+  shnu_rsqn_rate: string;
+  ntby_rsqn: string;
+}
+
+interface RawIndexPriceResponse {
+  rt_cd: string;
+  msg_cd: string;
+  msg1: string;
+  output: RawIndexPriceOutput;
+}
+
+function mapIndexPriceOutput(raw: RawIndexPriceOutput): KisIndexPriceOutput {
+  return {
+    bstpNmixPrpr: raw.bstp_nmix_prpr,
+    bstpNmixPrdyVrss: raw.bstp_nmix_prdy_vrss,
+    prdyVrssSign: raw.prdy_vrss_sign,
+    bstpNmixPrdyCtrt: raw.bstp_nmix_prdy_ctrt,
+    acmlVol: raw.acml_vol,
+    prdyVol: raw.prdy_vol,
+    acmlTrPbmn: raw.acml_tr_pbmn,
+    prdyTrPbmn: raw.prdy_tr_pbmn,
+    bstpNmixOprc: raw.bstp_nmix_oprc,
+    prdyNmixVrssNmixOprc: raw.prdy_nmix_vrss_nmix_oprc,
+    oprcVrssPrprSign: raw.oprc_vrss_prpr_sign,
+    bstpNmixOprcPrdyCtrt: raw.bstp_nmix_oprc_prdy_ctrt,
+    bstpNmixHgpr: raw.bstp_nmix_hgpr,
+    prdyNmixVrssNmixHgpr: raw.prdy_nmix_vrss_nmix_hgpr,
+    hgprVrssPrprSign: raw.hgpr_vrss_prpr_sign,
+    bstpNmixHgprPrdyCtrt: raw.bstp_nmix_hgpr_prdy_ctrt,
+    bstpNmixLwpr: raw.bstp_nmix_lwpr,
+    prdyClprVrssLwpr: raw.prdy_clpr_vrss_lwpr,
+    lwprVrssPrprSign: raw.lwpr_vrss_prpr_sign,
+    prdyClprVrssLwprRate: raw.prdy_clpr_vrss_lwpr_rate,
+    ascnIssuCnt: raw.ascn_issu_cnt,
+    uplmIssuCnt: raw.uplm_issu_cnt,
+    stnrIssuCnt: raw.stnr_issu_cnt,
+    downIssuCnt: raw.down_issu_cnt,
+    lslmIssuCnt: raw.lslm_issu_cnt,
+    dryyBstpNmixHgpr: raw.dryy_bstp_nmix_hgpr,
+    dryyHgprVrssPrprRate: raw.dryy_hgpr_vrss_prpr_rate,
+    dryyBstpNmixHgprDate: raw.dryy_bstp_nmix_hgpr_date,
+    dryyBstpNmixLwpr: raw.dryy_bstp_nmix_lwpr,
+    dryyLwprVrssPrprRate: raw.dryy_lwpr_vrss_prpr_rate,
+    dryyBstpNmixLwprDate: raw.dryy_bstp_nmix_lwpr_date,
+    totalAskpRsqn: raw.total_askp_rsqn,
+    totalBidpRsqn: raw.total_bidp_rsqn,
+    selnRsqnRate: raw.seln_rsqn_rate,
+    shnuRsqnRate: raw.shnu_rsqn_rate,
+    ntbyRsqn: raw.ntby_rsqn,
+  };
 }
 
 function mapStockPriceOutput(raw: RawStockPriceOutput): KisStockPriceOutput {
@@ -355,6 +450,48 @@ export function createKisMarketClient(env: BrokerEnv): KisMarketClient {
         msgCd: data.msg_cd,
         msg1: data.msg1,
         output: mapStockPriceOutput(data.output),
+      };
+    },
+
+    async getIndexPrice(
+      credentials: KisCredentials,
+      token: string,
+      params: KisIndexPriceParams,
+    ): Promise<KisIndexPriceResponse> {
+      const query = new URLSearchParams({
+        FID_COND_MRKT_DIV_CODE: "U",
+        FID_INPUT_ISCD: params.sectorCode,
+      });
+
+      const response = await fetch(
+        `${baseUrl}/uapi/domestic-stock/v1/quotations/inquire-index-price?${query}`,
+        {
+          method: "GET",
+          headers: {
+            "content-type": "application/json; charset=UTF-8",
+            authorization: `Bearer ${token}`,
+            appkey: credentials.appkey,
+            appsecret: credentials.appsecret,
+            tr_id: "FHPUP02100000",
+            custtype: "P",
+          },
+        },
+      );
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(
+          `KIS index price request failed: ${response.status} ${response.statusText}\n${errorBody}`,
+        );
+      }
+
+      const data: RawIndexPriceResponse = await response.json();
+
+      return {
+        rtCd: data.rt_cd,
+        msgCd: data.msg_cd,
+        msg1: data.msg1,
+        output: mapIndexPriceOutput(data.output),
       };
     },
   };

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import { createKisMarketClient } from "./market";
-import type { KisIntradayChartParams, KisStockPriceParams } from "./types";
+import type { KisIndexPriceParams, KisIntradayChartParams, KisStockPriceParams } from "./types";
 
 const originalFetch = globalThis.fetch;
 
@@ -30,6 +30,50 @@ const rawIntradayResponse = {
       acml_tr_pbmn: "330000000",
     },
   ],
+};
+
+const rawIndexPriceResponse = {
+  rt_cd: "0",
+  msg_cd: "MCA00000",
+  msg1: "정상처리 되었습니다.",
+  output: {
+    bstp_nmix_prpr: "2650.50",
+    bstp_nmix_prdy_vrss: "15.30",
+    prdy_vrss_sign: "2",
+    bstp_nmix_prdy_ctrt: "0.58",
+    acml_vol: "500000000",
+    prdy_vol: "480000000",
+    acml_tr_pbmn: "12000000000000",
+    prdy_tr_pbmn: "11500000000000",
+    bstp_nmix_oprc: "2640.00",
+    prdy_nmix_vrss_nmix_oprc: "4.80",
+    oprc_vrss_prpr_sign: "2",
+    bstp_nmix_oprc_prdy_ctrt: "0.18",
+    bstp_nmix_hgpr: "2655.00",
+    prdy_nmix_vrss_nmix_hgpr: "19.80",
+    hgpr_vrss_prpr_sign: "5",
+    bstp_nmix_hgpr_prdy_ctrt: "0.75",
+    bstp_nmix_lwpr: "2638.00",
+    prdy_clpr_vrss_lwpr: "2.80",
+    lwpr_vrss_prpr_sign: "2",
+    prdy_clpr_vrss_lwpr_rate: "0.11",
+    ascn_issu_cnt: "520",
+    uplm_issu_cnt: "3",
+    stnr_issu_cnt: "80",
+    down_issu_cnt: "300",
+    lslm_issu_cnt: "1",
+    dryy_bstp_nmix_hgpr: "2800.00",
+    dryy_hgpr_vrss_prpr_rate: "-5.34",
+    dryy_bstp_nmix_hgpr_date: "20250310",
+    dryy_bstp_nmix_lwpr: "2400.00",
+    dryy_lwpr_vrss_prpr_rate: "10.44",
+    dryy_bstp_nmix_lwpr_date: "20250115",
+    total_askp_rsqn: "5000000",
+    total_bidp_rsqn: "4500000",
+    seln_rsqn_rate: "52.63",
+    shnu_rsqn_rate: "47.37",
+    ntby_rsqn: "-500000",
+  },
 };
 
 const rawStockPriceResponse = {
@@ -147,6 +191,10 @@ const stockPriceParams: KisStockPriceParams = {
   stockCode: "005930",
 };
 
+const indexPriceParams: KisIndexPriceParams = {
+  sectorCode: "0001",
+};
+
 describe("createKisMarketClient", () => {
   test("sends correct query parameters", async () => {
     const client = createKisMarketClient("prod");
@@ -224,5 +272,57 @@ describe("getStockPrice", () => {
     expect(result.output.pbr).toBe("1.20");
     expect(result.output.w52Hgpr).toBe("72000");
     expect(result.output.w52Lwpr).toBe("53000");
+  });
+});
+
+describe("getIndexPrice", () => {
+  test("sends correct query parameters", async () => {
+    globalThis.fetch = mock(() =>
+      Promise.resolve(new Response(JSON.stringify(rawIndexPriceResponse), { status: 200 })),
+    );
+
+    const client = createKisMarketClient("prod");
+    await client.getIndexPrice(credentials, token, indexPriceParams);
+
+    const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
+    const url = new URL(callArgs[0] as string);
+
+    expect(url.pathname).toBe("/uapi/domestic-stock/v1/quotations/inquire-index-price");
+    expect(url.searchParams.get("FID_COND_MRKT_DIV_CODE")).toBe("U");
+    expect(url.searchParams.get("FID_INPUT_ISCD")).toBe("0001");
+  });
+
+  test("throws on HTTP error", async () => {
+    globalThis.fetch = mock(() =>
+      Promise.resolve(new Response("Forbidden", { status: 403, statusText: "Forbidden" })),
+    );
+
+    const client = createKisMarketClient("prod");
+
+    expect(client.getIndexPrice(credentials, token, indexPriceParams)).rejects.toThrow(
+      "KIS index price request failed: 403 Forbidden",
+    );
+  });
+
+  test("maps snake_case response to camelCase", async () => {
+    globalThis.fetch = mock(() =>
+      Promise.resolve(new Response(JSON.stringify(rawIndexPriceResponse), { status: 200 })),
+    );
+
+    const client = createKisMarketClient("prod");
+    const result = await client.getIndexPrice(credentials, token, indexPriceParams);
+
+    expect(result.rtCd).toBe("0");
+    expect(result.msgCd).toBe("MCA00000");
+    expect(result.output.bstpNmixPrpr).toBe("2650.50");
+    expect(result.output.bstpNmixPrdyVrss).toBe("15.30");
+    expect(result.output.prdyVrssSign).toBe("2");
+    expect(result.output.bstpNmixPrdyCtrt).toBe("0.58");
+    expect(result.output.acmlVol).toBe("500000000");
+    expect(result.output.ascnIssuCnt).toBe("520");
+    expect(result.output.downIssuCnt).toBe("300");
+    expect(result.output.dryyBstpNmixHgpr).toBe("2800.00");
+    expect(result.output.totalAskpRsqn).toBe("5000000");
+    expect(result.output.ntbyRsqn).toBe("-500000");
   });
 });
