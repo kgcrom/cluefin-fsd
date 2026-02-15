@@ -1,0 +1,29 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "41c9f6af3b5c",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "packages/securities/src/kis/index.ts",
+    "packages/securities/src/kis/order.test.ts",
+    "packages/securities/src/kis/order.ts",
+    "packages/securities/src/kis/types.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/41/c9f6af3b5c/0/metadata.json",
+      "transcript": "/41/c9f6af3b5c/0/full.jsonl",
+      "context": "/41/c9f6af3b5c/0/context.md",
+      "content_hash": "/41/c9f6af3b5c/0/content_hash.txt",
+      "prompt": "/41/c9f6af3b5c/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 20,
+    "cache_creation_tokens": 38382,
+    "cache_read_tokens": 756223,
+    "output_tokens": 3600,
+    "api_call_count": 17
+  }
+}
