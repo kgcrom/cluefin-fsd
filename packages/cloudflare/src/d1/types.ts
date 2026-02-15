@@ -1,6 +1,7 @@
 export type OrderSide = "buy" | "sell";
 export type OrderStatus = "pending" | "monitoring" | "executed" | "cancelled";
 export type OrderBroker = "kis" | "kiwoom";
+export type OrderMarket = "kospi" | "kosdaq";
 
 export interface TradeOrder {
   id: number;
@@ -12,6 +13,7 @@ export interface TradeOrder {
   trailingStopPct: number;
   volumeThreshold: number | null;
   broker: OrderBroker;
+  market: OrderMarket;
   status: OrderStatus;
   memo: string | null;
   createdAt: string;
@@ -28,6 +30,7 @@ export interface TradeOrderRow {
   trailing_stop_pct: number;
   volume_threshold: number | null;
   broker: OrderBroker;
+  market: OrderMarket;
   status: OrderStatus;
   memo: string | null;
   created_at: string;
@@ -84,5 +87,6 @@ export interface CreateTradeOrderInput {
   trailingStopPct?: number;
   volumeThreshold?: number;
   broker: OrderBroker;
+  market?: OrderMarket;
   memo?: string;
 }

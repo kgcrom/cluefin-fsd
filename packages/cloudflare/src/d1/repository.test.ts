@@ -12,6 +12,7 @@ const sampleRow: TradeOrderRow = {
   trailing_stop_pct: 3.0,
   volume_threshold: null,
   broker: "kis",
+  market: "kospi",
   status: "pending",
   memo: null,
   created_at: "2025-01-01 00:00:00",

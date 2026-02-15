@@ -28,6 +28,7 @@ export function toTradeOrder(row: TradeOrderRow): TradeOrder {
     trailingStopPct: row.trailing_stop_pct,
     volumeThreshold: row.volume_threshold,
     broker: row.broker,
+    market: row.market,
     status: row.status,
     memo: row.memo,
     createdAt: row.created_at,
