@@ -17,12 +17,6 @@ const mockGetDailyOrdersKis = mock(() =>
     output2: {},
   }),
 );
-const mockGetDailyOrdersKiwoom = mock(() =>
-  Promise.resolve({
-    cntr: [],
-  }),
-);
-const mockBuyOrderKiwoom = mock(() => Promise.resolve({ ordNo: "K001" }));
 
 mock.module("@cluefin/cloudflare", () => ({
   createOrderRepository: () => ({
@@ -39,17 +33,14 @@ mock.module("@cluefin/securities", () => ({
   createKisAuthClient: () => ({
     getToken: mock(),
   }),
+  createKisMarketClient: () => ({
+    getStockPrice: mock(() => Promise.resolve({ output: { stckPrpr: "66000" } })),
+    getIndexPrice: mock(() => Promise.resolve({ output: { bstpNmixPrpr: "2500" } })),
+  }),
   createKisOrderClient: () => ({
     buyOrder: mockBuyOrder,
     sellOrder: mockSellOrder,
     getDailyOrders: mockGetDailyOrdersKis,
-  }),
-  createKiwoomAuthClient: () => ({
-    getToken: mock(),
-  }),
-  createKiwoomOrderClient: () => ({
-    buyOrder: mockBuyOrderKiwoom,
-    getDailyOrders: mockGetDailyOrdersKiwoom,
   }),
 }));
 
@@ -61,13 +52,6 @@ function createMockD1() {
     kis: {
       broker: "kis",
       token: "kis-token",
-      token_type: "Bearer",
-      expires_at: futureDate,
-      updated_at: new Date().toISOString(),
-    },
-    kiwoom: {
-      broker: "kiwoom",
-      token: "kiwoom-token",
       token_type: "Bearer",
       expires_at: futureDate,
       updated_at: new Date().toISOString(),
@@ -89,10 +73,6 @@ const mockEnv = {
   KIS_ENV: "dev",
   KIS_ACCOUNT_NO: "12345",
   KIS_ACCOUNT_PRODUCT_CODE: "01",
-  KIWOOM_APP_KEY: "test-key",
-  KIWOOM_SECRET_KEY: "test-secret",
-  KIWOOM_ENV: "dev",
-  BROKER_TOKEN_KIWOOM: "kiwoom-token",
   cluefin_fsd_db: createMockD1(),
 };
 
@@ -106,8 +86,6 @@ afterEach(() => {
   mockBuyOrder.mockClear();
   mockSellOrder.mockClear();
   mockGetDailyOrdersKis.mockClear();
-  mockGetDailyOrdersKiwoom.mockClear();
-  mockBuyOrderKiwoom.mockClear();
 });
 
 describe("handleOrderExecution", () => {
@@ -160,7 +138,6 @@ describe("handleFillCheck", () => {
     await handleFillCheck(mockEnv);
 
     expect(mockGetDailyOrdersKis).not.toHaveBeenCalled();
-    expect(mockGetDailyOrdersKiwoom).not.toHaveBeenCalled();
   });
 
   test("KIS 완전체결 주문", async () => {
@@ -265,66 +242,6 @@ describe("handleFillCheck", () => {
     expect(mockUpdateExecutionFill).toHaveBeenCalledWith(3, 0, 0, "rejected");
   });
 
-  test("Kiwoom 완전체결 주문", async () => {
-    mockGetUnfilledExecutions.mockResolvedValueOnce([
-      {
-        id: 4,
-        orderId: 40,
-        brokerOrderId: "KIWOOM001",
-        requestedQty: 10,
-        requestedPrice: 50000,
-        broker: "kiwoom",
-        status: "ordered",
-        createdAt: new Date(),
-      },
-    ]);
-
-    mockGetDailyOrdersKiwoom.mockResolvedValueOnce({
-      cntr: [
-        {
-          ordNo: "KIWOOM001",
-          cntrQty: "10",
-          cntrPric: "50000",
-          ordStt: "체결",
-        },
-      ],
-    });
-
-    await handleFillCheck(mockEnv);
-
-    expect(mockUpdateExecutionFill).toHaveBeenCalledWith(4, 10, 50000, "filled");
-  });
-
-  test("Kiwoom 거부 주문", async () => {
-    mockGetUnfilledExecutions.mockResolvedValueOnce([
-      {
-        id: 5,
-        orderId: 50,
-        brokerOrderId: "KIWOOM002",
-        requestedQty: 10,
-        requestedPrice: 50000,
-        broker: "kiwoom",
-        status: "ordered",
-        createdAt: new Date(),
-      },
-    ]);
-
-    mockGetDailyOrdersKiwoom.mockResolvedValueOnce({
-      cntr: [
-        {
-          ordNo: "KIWOOM002",
-          cntrQty: "0",
-          cntrPric: "0",
-          ordStt: "거부",
-        },
-      ],
-    });
-
-    await handleFillCheck(mockEnv);
-
-    expect(mockUpdateExecutionFill).toHaveBeenCalledWith(5, 0, 0, "rejected");
-  });
-
   test("API에 주문이 없으면 경고만 출력", async () => {
     mockGetUnfilledExecutions.mockResolvedValueOnce([
       {
@@ -352,7 +269,7 @@ describe("handleFillCheck", () => {
     expect(mockUpdateExecutionFill).not.toHaveBeenCalled();
   });
 
-  test("여러 증권사 혼합 처리", async () => {
+  test("여러 KIS 주문 혼합 처리", async () => {
     mockGetUnfilledExecutions.mockResolvedValueOnce([
       {
         id: 7,
@@ -374,16 +291,6 @@ describe("handleFillCheck", () => {
         status: "ordered",
         createdAt: new Date(),
       },
-      {
-        id: 9,
-        orderId: 90,
-        brokerOrderId: "KIWOOM100",
-        requestedQty: 8,
-        requestedPrice: 70000,
-        broker: "kiwoom",
-        status: "ordered",
-        createdAt: new Date(),
-      },
     ]);
 
     mockGetDailyOrdersKis.mockResolvedValueOnce({
@@ -397,55 +304,14 @@ describe("handleFillCheck", () => {
       output2: {},
     });
 
-    mockGetDailyOrdersKiwoom.mockResolvedValueOnce({
-      cntr: [{ ordNo: "KIWOOM100", cntrQty: "8", cntrPric: "70000", ordStt: "체결" }],
-    });
-
     await handleFillCheck(mockEnv);
 
-    expect(mockUpdateExecutionFill).toHaveBeenCalledTimes(3);
+    expect(mockUpdateExecutionFill).toHaveBeenCalledTimes(2);
     expect(mockUpdateExecutionFill).toHaveBeenCalledWith(7, 10, 50000, "filled");
     expect(mockUpdateExecutionFill).toHaveBeenCalledWith(8, 5, 60000, "filled");
-    expect(mockUpdateExecutionFill).toHaveBeenCalledWith(9, 8, 70000, "filled");
   });
 
-  test("한 증권사 실패해도 다른 증권사는 처리", async () => {
-    mockGetUnfilledExecutions.mockResolvedValueOnce([
-      {
-        id: 10,
-        orderId: 100,
-        brokerOrderId: "KIS300",
-        requestedQty: 10,
-        requestedPrice: 50000,
-        broker: "kis",
-        status: "ordered",
-        createdAt: new Date(),
-      },
-      {
-        id: 11,
-        orderId: 110,
-        brokerOrderId: "KIWOOM200",
-        requestedQty: 5,
-        requestedPrice: 60000,
-        broker: "kiwoom",
-        status: "ordered",
-        createdAt: new Date(),
-      },
-    ]);
-
-    mockGetDailyOrdersKis.mockRejectedValueOnce(new Error("KIS API error"));
-
-    mockGetDailyOrdersKiwoom.mockResolvedValueOnce({
-      cntr: [{ ordNo: "KIWOOM200", cntrQty: "5", cntrPric: "60000", ordStt: "체결" }],
-    });
-
-    await handleFillCheck(mockEnv);
-
-    expect(mockUpdateExecutionFill).toHaveBeenCalledTimes(1);
-    expect(mockUpdateExecutionFill).toHaveBeenCalledWith(11, 5, 60000, "filled");
-  });
-
-  test("모든 증권사 실패하면 에러 발생", async () => {
+  test("KIS 실패하면 에러 발생", async () => {
     mockGetUnfilledExecutions.mockResolvedValueOnce([
       {
         id: 12,
@@ -457,22 +323,11 @@ describe("handleFillCheck", () => {
         status: "ordered",
         createdAt: new Date(),
       },
-      {
-        id: 13,
-        orderId: 130,
-        brokerOrderId: "KIWOOM300",
-        requestedQty: 5,
-        requestedPrice: 60000,
-        broker: "kiwoom",
-        status: "ordered",
-        createdAt: new Date(),
-      },
     ]);
 
     mockGetDailyOrdersKis.mockRejectedValueOnce(new Error("KIS API error"));
-    mockGetDailyOrdersKiwoom.mockRejectedValueOnce(new Error("Kiwoom API error"));
 
-    await expect(handleFillCheck(mockEnv)).rejects.toThrow("모든 증권사 체결 확인 실패");
+    await expect(handleFillCheck(mockEnv)).rejects.toThrow("KIS API error");
 
     expect(mockUpdateExecutionFill).not.toHaveBeenCalled();
   });
