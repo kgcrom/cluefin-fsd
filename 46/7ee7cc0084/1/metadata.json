@@ -1,0 +1,32 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "467ee7cc0084",
+  "session_id": "8373224c-07fe-4631-b1a2-fad4c695f31c",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-15T14:09:01.30888Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "apps/trader/migrations/0004_add_market_to_trade_orders.sql",
+    "apps/trader/src/cron.test.ts",
+    "apps/trader/src/cron.ts"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 19,
+    "cache_creation_tokens": 42309,
+    "cache_read_tokens": 718274,
+    "output_tokens": 922,
+    "api_call_count": 16
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-15T14:09:01.159769Z",
+    "agent_lines": 40,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 1,
+    "total_committed": 40,
+    "agent_percentage": 100
+  },
+  "transcript_path": ".claude/projects/-Volumes-kgcrom-2tb-kgcrom-workspace-cluefin-fsd/8373224c-07fe-4631-b1a2-fad4c695f31c.jsonl"
+}

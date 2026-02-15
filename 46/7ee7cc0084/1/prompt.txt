@@ -1,0 +1,118 @@
+Implement the following plan:
+
+# Kiwoom 관련 코드 제거 (cron.ts, cron.test.ts)
+
+## Context
+Kiwoom 증권사 연동은 나중에 추가할 예정이므로, 현재 cron 모듈에서 Kiwoom 관련 코드를 모두 제거한다.
+
+## 변경 파일
+
+### 1. `apps/trader/src/cron.ts`
+
+- **import 제거**: `createKiwoomOrderClient`, `KiwoomDailyOrderParams` (line 8, 12)
+- **함수 삭제**: `executeKiwoomOrder` (lines 50-79)
+- **`handleOrderExecution`**:
+  - kiwoomToken 조회 제거 (line 88)
+  - kiwoom 분기 제거 (lines 159-167) — kis만 남기고 else 분기 삭제
+- **함수 삭제**: `checkKiwoomFills` (lines 256-307)
+- **`handleFillCheck`**:
+  - kiwoomList 분리/처리 제거 (line 322, 334-339)
+  - "양쪽 다 실패" 로직 제거 → KIS 실패 시 바로 throw로 단순화
+  - errors 배열 패턴 제거, try/catch 단순화
+- **`handleScheduled`**:
+  - kiwoom 토큰 갱신 제거 (line 366) — `Promise.allSettled` → 단일 `refreshBrokerToken(env, "kis")`로 단순화
+
+### 2. `apps/trader/src/cron.test.ts`
+
+- **mock 변수 제거**: `mockGetDailyOrdersKiwoom`, `mockBuyOrderKiwoom` (lines 20-25)
+- **mock.module 정리**: `createKiwoomAuthClient`, `createKiwoomOrderClient` 제거 (lines 47-53)
+- **mockEnv 정리**: `KIWOOM_*` 환경변수 제거 (lines 93-95)
+- **afterEach 정리**: kiwoom mock clear 제거 (lines 109-110)
+- **테스트 삭제**:
+  - "Kiwoom 완전체결 주문" (lines 268-296)
+  - "Kiwoom 거부 주문" (lines 298-326)
+- **테스트 수정**:
+  - "여러 증권사 혼합 처리" → KIS만으로 재구성하거나 삭제
+  - "한 증권사 실패해도 다른 증권사는 처리" → 제거 (단일 브로커이므로 불필요)
+  - "모든 증권사 실패하면 에러 발생" → KIS 실패 시 에러 발생으로 단순화
+
+## 검증
+```sh
+bun test apps/trader
+```
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /Volumes/kgcrom-2tb/kgcrom/.REDACTED.jsonl
+
+If this plan can be broken down into multiple independent tasks, consider using the TeamCreate tool to create a team and parallelize the work.
+
+---
+
+Base directory for this skill: /Volumes/kgcrom-2tb/kgcrom/.claude/skills/commit
+
+## Format
+
+```
+<type>: <short summary in Korean>
+
+<optional body in Korean>
+```
+
+## Core Rules
+
+**Language:**
+- Type prefix in English (feat, fix, refactor, docs, test, chore, perf, style)
+- Summary and body in Korean
+- Use concise verb forms: "추가", "수정", "삭제" (NOT "추가하도록 함", "수정하도록 함")
+
+**Header:**
+- Under 50 characters
+- Lowercase start, no period at end
+- Imperative mood: describe WHAT changed, not HOW
+
+**Body (optional):**
+- One blank line after header
+- Wrap at 72 characters
+- Explain WHY, not WHAT (diff shows what)
+
+## Examples
+
+✅ **Good:**
+```
+feat: JWT 인증 추가
+fix: 타임존 계산 오류 수정
+refactor: 주문 로직 분리
+```
+
+❌ **Bad:**
+```
+feat: JWT 인증을 추가하도록 함    (verbose form)
+파일 업데이트                    (too vague)
+fixed bug                       (past tense, English)
+```
+
+**With body:**
+```
+feat: 체결 확인 크론 작업 구현
+
+장 마감 후 미체결 주문에 대한 자동 체결 확인 추가.
+KST 16:00-17:59 사이 매 분마다 실행.
+
+- 양 증권사에서 일일 주문 조회
+- broker_order_id로 매칭
+- 상태 업데이트: 체결/부분체결/거부
+```
+
+## Git Staging
+
+1. Run `git status` first
+2. Only stage files modified in current session
+3. Ask user if other files are changed
+4. Use `git add <specific-files>` (NOT `git add .` or `-A`)
+
+## Critical Don'ts
+
+❌ NEVER add `Co-Authored-By: Claude` or AI attribution
+❌ NEVER use verbose Korean: "추가하도록 함", "처리하도록 함"
+❌ NEVER use past tense or vague messages
+❌ NEVER use periods at end of header
