@@ -14,5 +14,8 @@ export type {
   KisOrderOutput,
   KisOrderParams,
   KisOrderResponse,
+  KisStockPriceOutput,
+  KisStockPriceParams,
+  KisStockPriceResponse,
   KisTokenResponse,
 } from "./types";

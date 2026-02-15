@@ -202,6 +202,115 @@ export interface KisDailyOrderSummary {
   buyCcldAmt: string;
 }
 
+/** 주식현재가 시세조회 파라미터 */
+export interface KisStockPriceParams {
+  marketCode: "J" | "NX" | "UN";
+  stockCode: string;
+}
+
+/** 주식현재가 시세조회 응답 output */
+export interface KisStockPriceOutput {
+  // 종목 상태
+  iscdStatClsCode: string;
+  margRate: string;
+  rprsMrktKorName: string;
+  newHgprLwprClsCode: string;
+  bstpKorIsnm: string;
+  tempStopYn: string;
+  oprcRangContYn: string;
+  clprRangContYn: string;
+  crdtAbleYn: string;
+  grmnRateClsCode: string;
+  elwPblcYn: string;
+  // 현재가·등락
+  stckPrpr: string;
+  prdyVrss: string;
+  prdyVrssSign: string;
+  prdyCtrt: string;
+  // 거래
+  acmlTrPbmn: string;
+  acmlVol: string;
+  prdyVrssVolRate: string;
+  // 가격
+  stckOprc: string;
+  stckHgpr: string;
+  stckLwpr: string;
+  stckMxpr: string;
+  stckLlam: string;
+  stckSdpr: string;
+  wghnAvrgStckPrc: string;
+  // 외국인·프로그램
+  htsFrgnEhrt: string;
+  frgnNtbyQty: string;
+  pgtrNtbyQty: string;
+  // 피벗
+  pvtScndDmrsPrc: string;
+  pvtFrstDmrsPrc: string;
+  pvtPontVal: string;
+  pvtFrstDmspPrc: string;
+  pvtScndDmspPrc: string;
+  dmrsVal: string;
+  dmspVal: string;
+  // 기업 정보
+  cpfn: string;
+  rstcWdthPrc: string;
+  stckFcam: string;
+  stckSspr: string;
+  asprUnit: string;
+  htsDealQtyUnitVal: string;
+  lstnStcn: string;
+  htsAvls: string;
+  per: string;
+  pbr: string;
+  stacMonth: string;
+  volTnrt: string;
+  eps: string;
+  bps: string;
+  // 250일·연중·52주
+  d250Hgpr: string;
+  d250HgprDate: string;
+  d250HgprVrssPrprRate: string;
+  d250Lwpr: string;
+  d250LwprDate: string;
+  d250LwprVrssPrprRate: string;
+  stckDryyHgpr: string;
+  dryyHgprVrssPrprRate: string;
+  dryyHgprDate: string;
+  stckDryyLwpr: string;
+  dryyLwprVrssPrprRate: string;
+  dryyLwprDate: string;
+  w52Hgpr: string;
+  w52HgprVrssPrprCtrt: string;
+  w52HgprDate: string;
+  w52Lwpr: string;
+  w52LwprVrssPrprCtrt: string;
+  w52LwprDate: string;
+  // 기타
+  wholLoanRmndRate: string;
+  sstsYn: string;
+  stckShrnIscd: string;
+  fcamCnnm: string;
+  cpfnCnnm: string;
+  apprchRate: string;
+  frgnHldnQty: string;
+  viClsCode: string;
+  ovtmViClsCode: string;
+  lastSstsCntgQty: string;
+  invtCafulYn: string;
+  mrktWarnClsCode: string;
+  shortOverYn: string;
+  sltrYn: string;
+  mangIssuClsCode: string;
+}
+
+/** 주식현재가 시세조회 응답 */
+export interface KisStockPriceResponse {
+  rtCd: string;
+  msgCd: string;
+  msg1: string;
+  output: KisStockPriceOutput;
+}
+
 /** 주식일별주문체결조회 응답 */
 export interface KisDailyOrderResponse {
   rtCd: string;

@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import { createKisMarketClient } from "./market";
-import type { KisIntradayChartParams } from "./types";
+import type { KisIntradayChartParams, KisStockPriceParams } from "./types";
 
 const originalFetch = globalThis.fetch;
 
-const rawResponse = {
+const rawIntradayResponse = {
   rt_cd: "0",
   msg_cd: "MCA00000",
   msg1: "정상처리 되었습니다.",
@@ -32,9 +32,99 @@ const rawResponse = {
   ],
 };
 
+const rawStockPriceResponse = {
+  rt_cd: "0",
+  msg_cd: "MCA00000",
+  msg1: "정상처리 되었습니다.",
+  output: {
+    iscd_stat_cls_code: "55",
+    marg_rate: "20.00",
+    rprs_mrkt_kor_name: "KOSPI200",
+    new_hgpr_lwpr_cls_code: " ",
+    bstp_kor_isnm: "전기전자",
+    temp_stop_yn: "N",
+    oprc_rang_cont_yn: "N",
+    clpr_rang_cont_yn: "N",
+    crdt_able_yn: "Y",
+    grmn_rate_cls_code: "40",
+    elw_pblc_yn: "Y",
+    stck_prpr: "66100",
+    prdy_vrss: "100",
+    prdy_vrss_sign: "2",
+    prdy_ctrt: "0.15",
+    acml_tr_pbmn: "660000000000",
+    acml_vol: "10000000",
+    prdy_vrss_vol_rate: "85.20",
+    stck_oprc: "66000",
+    stck_hgpr: "66300",
+    stck_lwpr: "65800",
+    stck_mxpr: "85800",
+    stck_llam: "46200",
+    stck_sdpr: "66000",
+    wghn_avrg_stck_prc: "66050",
+    hts_frgn_ehrt: "52.50",
+    frgn_ntby_qty: "-500000",
+    pgtr_ntby_qty: "100000",
+    pvt_scnd_dmrs_prc: "65500",
+    pvt_frst_dmrs_prc: "65800",
+    pvt_pont_val: "66100",
+    pvt_frst_dmsp_prc: "66400",
+    pvt_scnd_dmsp_prc: "66700",
+    dmrs_val: "65800",
+    dmsp_val: "66400",
+    cpfn: "100",
+    rstc_wdth_prc: "19800",
+    stck_fcam: "100",
+    stck_sspr: "66100",
+    aspr_unit: "100",
+    hts_deal_qty_unit_val: "1",
+    lstn_stcn: "5969782550",
+    hts_avls: "394603",
+    per: "25.50",
+    pbr: "1.20",
+    stac_month: "12",
+    vol_tnrt: "0.17",
+    eps: "2592",
+    bps: "55083",
+    d250_hgpr: "72000",
+    d250_hgpr_date: "20250310",
+    d250_hgpr_vrss_prpr_rate: "-8.19",
+    d250_lwpr: "53000",
+    d250_lwpr_date: "20240815",
+    d250_lwpr_vrss_prpr_rate: "24.72",
+    stck_dryy_hgpr: "72000",
+    dryy_hgpr_vrss_prpr_rate: "-8.19",
+    dryy_hgpr_date: "20250310",
+    stck_dryy_lwpr: "60000",
+    dryy_lwpr_vrss_prpr_rate: "10.17",
+    dryy_lwpr_date: "20250115",
+    w52_hgpr: "72000",
+    w52_hgpr_vrss_prpr_ctrt: "-8.19",
+    w52_hgpr_date: "20250310",
+    w52_lwpr: "53000",
+    w52_lwpr_vrss_prpr_ctrt: "24.72",
+    w52_lwpr_date: "20240815",
+    whol_loan_rmnd_rate: "0.50",
+    ssts_yn: "Y",
+    stck_shrn_iscd: "005930",
+    fcam_cnnm: "원",
+    cpfn_cnnm: "원",
+    apprch_rate: "50.00",
+    frgn_hldn_qty: "3134000000",
+    vi_cls_code: "N",
+    ovtm_vi_cls_code: "N",
+    last_ssts_cntg_qty: "0",
+    invt_caful_yn: "N",
+    mrkt_warn_cls_code: "00",
+    short_over_yn: "N",
+    sltr_yn: "N",
+    mang_issu_cls_code: "00",
+  },
+};
+
 beforeEach(() => {
   globalThis.fetch = mock(() =>
-    Promise.resolve(new Response(JSON.stringify(rawResponse), { status: 200 })),
+    Promise.resolve(new Response(JSON.stringify(rawIntradayResponse), { status: 200 })),
   );
 });
 
@@ -50,6 +140,11 @@ const params: KisIntradayChartParams = {
   inputHour: "130000",
   includePrevData: "N",
   etcClassCode: "",
+};
+
+const stockPriceParams: KisStockPriceParams = {
+  marketCode: "J",
+  stockCode: "005930",
 };
 
 describe("createKisMarketClient", () => {
@@ -77,5 +172,57 @@ describe("createKisMarketClient", () => {
     expect(client.getIntradayChart(credentials, token, params)).rejects.toThrow(
       "KIS intraday chart request failed: 403 Forbidden",
     );
+  });
+});
+
+describe("getStockPrice", () => {
+  test("sends correct query parameters", async () => {
+    globalThis.fetch = mock(() =>
+      Promise.resolve(new Response(JSON.stringify(rawStockPriceResponse), { status: 200 })),
+    );
+
+    const client = createKisMarketClient("prod");
+    await client.getStockPrice(credentials, token, stockPriceParams);
+
+    const callArgs = (globalThis.fetch as ReturnType<typeof mock>).mock.calls[0];
+    const url = new URL(callArgs[0] as string);
+
+    expect(url.pathname).toBe("/uapi/domestic-stock/v1/quotations/inquire-price");
+    expect(url.searchParams.get("FID_COND_MRKT_DIV_CODE")).toBe("J");
+    expect(url.searchParams.get("FID_INPUT_ISCD")).toBe("005930");
+  });
+
+  test("throws on HTTP error", async () => {
+    globalThis.fetch = mock(() =>
+      Promise.resolve(new Response("Forbidden", { status: 403, statusText: "Forbidden" })),
+    );
+
+    const client = createKisMarketClient("prod");
+
+    expect(client.getStockPrice(credentials, token, stockPriceParams)).rejects.toThrow(
+      "KIS stock price request failed: 403 Forbidden",
+    );
+  });
+
+  test("maps snake_case response to camelCase", async () => {
+    globalThis.fetch = mock(() =>
+      Promise.resolve(new Response(JSON.stringify(rawStockPriceResponse), { status: 200 })),
+    );
+
+    const client = createKisMarketClient("prod");
+    const result = await client.getStockPrice(credentials, token, stockPriceParams);
+
+    expect(result.rtCd).toBe("0");
+    expect(result.msgCd).toBe("MCA00000");
+    expect(result.output.stckPrpr).toBe("66100");
+    expect(result.output.prdyVrss).toBe("100");
+    expect(result.output.prdyVrssSign).toBe("2");
+    expect(result.output.prdyCtrt).toBe("0.15");
+    expect(result.output.acmlVol).toBe("10000000");
+    expect(result.output.bstpKorIsnm).toBe("전기전자");
+    expect(result.output.per).toBe("25.50");
+    expect(result.output.pbr).toBe("1.20");
+    expect(result.output.w52Hgpr).toBe("72000");
+    expect(result.output.w52Lwpr).toBe("53000");
   });
 });
